@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadrante 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf2;
+    --text-muted: #7880a0;
+    --accent: #4e82ee;
+    --accent2: #7c5cfc;
+    --weekend-bg: rgba(255,120,50,0.12);
+    --weekend-text: #ff7832;
+    --header-h: 64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .logo span { color: var(--accent); }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  label {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 180px;
+  }
+  select:focus, select:hover { border-color: var(--accent); }
+
+  .print-btn {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .print-btn:hover { opacity: 0.85; }
+
+  /* LEGEND */
+  .legend {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .legend-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* MAIN CONTENT */
+  main {
+    flex: 1;
+    padding: 20px 24px 40px;
+    overflow-x: auto;
+  }
+
+  /* MONTH SECTION */
+  .month-section {
+    margin-bottom: 28px;
+  }
+
+  .month-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .month-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .month-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* TABLE */
+  .cuadrante-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 900px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  .cuadrante-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 4px;
+    text-align: center;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    min-width: 32px;
+  }
+
+  .cuadrante-table th.worker-col {
+    text-align: left;
+    padding: 5px 10px;
+    min-width: 120px;
+    background: var(--surface);
+  }
+
+  .cuadrante-table th.weekend-th {
+    color: var(--weekend-text);
+    background: rgba(255,120,50,0.06);
+  }
+
+  .cuadrante-table td {
+    border: 1px solid var(--border);
+    padding: 4px 3px;
+    text-align: center;
+    vertical-align: middle;
+    transition: filter 0.1s;
+    min-width: 32px;
+  }
+
+  .cuadrante-table td.worker-name {
+    text-align: left;
+    padding: 5px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .cuadrante-table tr:hover td:not(.worker-name) {
+    filter: brightness(1.1);
+  }
+
+  /* Cell with color */
+  .cell-val {
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  .cell-val.dark-text { color: #1a1d27; }
+
+  .cell-empty-weekend {
+    background: var(--weekend-bg);
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .cuadrante-table td.weekend-td {
+    background: rgba(255,120,50,0.05);
+  }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+  }
+  .summary-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .summary-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .summary-count {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+  }
+
+  /* PRINT */
+  @media print {
+    :root { --bg: #fff; --surface: #fff; --surface2: #f0f0f0; --border: #ccc; --text: #000; --text-muted: #666; }
+    header, .legend, .summary-bar { display: none; }
+    main { padding: 0; }
+    .month-section { page-break-inside: avoid; margin-bottom: 20px; }
+    body { background: white; color: black; }
+    .cuadrante-table td.worker-name { background: #f5f5f5; color: #000; }
+    .cuadrante-table th { background: #e0e0e0; color: #444; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Cuadrante <span>2026</span></div>
+  <div class="controls">
+    <label for="worker-select">Trabajador:</label>
+    <select id="worker-select">
+      <option value="ALL">— Todos —</option>
+    </select>
+    <label for="month-select" style="margin-left:12px">Mes:</label>
+    <select id="month-select">
+      <option value="ALL">— Todos los meses —</option>
+    </select>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
+</header>
+
+<div class="legend">
+  <span class="legend-title">Leyenda:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> L (Libre)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> FSM / FSMF / FSM112</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#70AD47"></div> VC / LOC / Guardia</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> G / GF / GFF</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#44546A"></div> 112M / 112T / LOC112</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F2B800"></div> TT</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> V</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,120,50,0.3); border:1px solid rgba(255,120,50,0.5)"></div> Fin de semana</div>
+</div>
+
+<div id="summary-bar" class="summary-bar" style="display:none"></div>
+
+<main id="main-content">
+  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">Cargando cuadrante...</div>
+</main>
+
+<script src="datos.js"></script>
+
+<script>
+
+const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+// 🎯 EL DICCIONARIO MÁGICO: Traduce los números y fuerza colores perfectos
+const MAPEO_TURNOS = {
+  "1": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
+  "3": { texto: "G",   bg: "#F8CBAD", color: "#000000" }, 
+  "4": { texto: "GF",  bg: "#F8CBAD", color: "#000000" }, 
+  "5": { texto: "GFF", bg: "#F8CBAD", color: "#000000" }, 
+  "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSMF",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112F", bg: "#FF0000", color: "#FFFFFF" },
+  "M7": { texto: "M7", bg: "#FFF2CC", color: "#000000" }, 
+  "M8": { texto: "M8", bg: "#FFE699", color: "#000000" }, 
+  "M9": { texto: "M9", bg: "#FFE699", color: "#000000" }, 
+  "TT": { texto: "TT", bg: "#FFC000", color: "#000000" }, 
+  "L":   { texto: "L",   bg: "#00B0F0", color: "#FFFFFF" }, 
+  "G":   { texto: "G",   bg: "#B4C6E7", color: "#000000" }, 
+  "GF":  { texto: "GF",  bg: "#B4C6E7", color: "#000000" }, 
+  "GFF": { texto: "GFF", bg: "#B4C6E7", color: "#000000" }, 
+  "V":   { texto: "V",   bg: "#92D050", color: "#000000" }, 
+  "VC":  { texto: "VC",  bg: "#548235", color: "#FFFFFF" }, 
+  "LOC": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
+  "112M":    { texto: "112M",    bg: "#D9D9D9", color: "#000000" }, 
+  "112T":    { texto: "112T",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC112M", bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112T": { texto: "LOC112T", bg: "#D9D9D9", color: "#000000" }, 
+  "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" }, 
+  "P":       { texto: "P",       bg: "#A6A6A6", color: "#000000" }, 
+  "B":       { texto: "B",       bg: "#595959", color: "#FFFFFF" } 
+};
+
+// Color helpers
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(0,2),16);
+  const g = parseInt(hex.slice(2,4),16);
+  const b = parseInt(hex.slice(4,6),16);
+  return [r,g,b];
+}
+function luminance(hex) {
+  const [r,g,b] = hexToRgb(hex).map(v => v/255);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+function textColor(bgHex) {
+  return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
+}
+
+// Populate selects
+const workerSelect = document.getElementById('worker-select');
+const monthSelect = document.getElementById('month-select');
+
+// Workers (exclude VACANTE)
+DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p;
+  opt.textContent = p;
+  workerSelect.appendChild(opt);
+});
+
+MONTHS_ORDER.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = m;
+  opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+  monthSelect.appendChild(opt);
+});
+
+// Render
+function renderAll() {
+  const selectedWorker = workerSelect.value;
+  const selectedMonth = monthSelect.value;
+
+  const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
+  const workers = selectedWorker === 'ALL'
+    ? DATA.personas.filter(p => !p.includes('VACANTE'))
+    : [selectedWorker];
+
+  const main = document.getElementById('main-content');
+  main.innerHTML = '';
+
+  // Summary (only for single worker)
+  if (selectedWorker !== 'ALL') {
+    renderSummary(selectedWorker, months);
+  } else {
+    document.getElementById('summary-bar').style.display = 'none';
+  }
+
+  months.forEach(monthName => {
+    const mdata = DATA.meses[monthName];
+    if (!mdata) return;
+
+    const section = document.createElement('div');
+    section.className = 'month-section';
+
+    // Month header
+    const mh = document.createElement('div');
+    mh.className = 'month-header';
+    mh.innerHTML = `<span class="month-name">${monthName}</span><div class="month-line"></div>`;
+    section.appendChild(mh);
+
+    // Table
+    const table = document.createElement('table');
+    table.className = 'cuadrante-table';
+
+    // Header row
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const thName = document.createElement('th');
+    thName.className = 'worker-col';
+    thName.textContent = 'Trabajador';
+    headerRow.appendChild(thName);
+
+    mdata.days.forEach(day => {
+      const th = document.createElement('th');
+      const isWE = day.name.includes('Sá') || day.name.includes('Do');
+      if (isWE) th.className = 'weekend-th';
+      th.innerHTML = `<div>${day.num}</div><div style="font-size:9px;opacity:0.7">${day.name.replace('.','')}</div>`;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Body rows
+    const tbody = document.createElement('tbody');
+    workers.forEach(worker => {
+      const shifts = mdata.workers[worker];
+      if (!shifts) return;
+
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td');
+      tdName.className = 'worker-name';
+      tdName.textContent = worker;
+      tr.appendChild(tdName);
+
+shifts.forEach((shift, i) => {
+        const td = document.createElement('td');
+        const isWE = mdata.days[i] && (mdata.days[i].name.includes('Sá') || mdata.days[i].name.includes('Do'));
+        if (isWE) td.className = 'weekend-td';
+
+        if (shift.val !== null && shift.val !== undefined) {
+          // Valores por defecto
+          let valToDisplay = shift.val;
+          let valKey = String(shift.val).trim().toUpperCase();
+          let bgToDisplay = shift.color ? '#' + shift.color : '';
+          let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
+
+          // Traducir si existe en el diccionario
+          if (MAPEO_TURNOS[valKey]) {
+            valToDisplay = MAPEO_TURNOS[valKey].texto;
+            bgToDisplay = MAPEO_TURNOS[valKey].bg;
+            colorToDisplay = MAPEO_TURNOS[valKey].color;
+          }
+
+          if (bgToDisplay) {
+            const span = document.createElement('span');
+            span.className = 'cell-val';
+            span.style.backgroundColor = bgToDisplay;
+            span.style.color = colorToDisplay;
+            span.textContent = valToDisplay;
+            td.appendChild(span);
+          } else {
+            // Sin color (P, etc.)
+            td.textContent = valToDisplay;
+            td.style.color = colorToDisplay;
+            td.style.fontWeight = '500';
+          }
+        } else if (isWE) {
+          td.style.background = 'rgba(255,120,50,0.07)';
+        }
+
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    section.appendChild(table);
+    main.appendChild(section);
+  });
+}
+
+function renderSummary(worker, months) {
+  const bar = document.getElementById('summary-bar');
+  bar.style.display = 'flex';
+  const counts = {};
+  
+  months.forEach(monthName => {
+    const mdata = DATA.meses[monthName];
+    if (!mdata || !mdata.workers[worker]) return;
+    
+    mdata.workers[worker].forEach(shift => {
+      if (shift.val !== null && shift.val !== undefined) {
+        let valKey = String(shift.val).trim().toUpperCase();
+        let displayVal = shift.val;
+        let displayColor = shift.color ? '#' + shift.color : 'none';
+
+        // Traducimos también para el resumen
+        if (MAPEO_TURNOS[valKey]) {
+          displayVal = MAPEO_TURNOS[valKey].texto;
+          displayColor = MAPEO_TURNOS[valKey].bg;
+        }
+
+        const key = displayVal + '|' + displayColor;
+        if (!counts[key]) counts[key] = { val: displayVal, color: displayColor, n: 0 };
+        counts[key].n++;
+      }
+    });
+  });
+
+  bar.innerHTML = '<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ' + worker + ':</span>';
+
+  Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'summary-item';
+    
+    const dot = document.createElement('div');
+    dot.className = 'summary-dot';
+    if (item.color !== 'none') {
+        // Asegurarnos de que coge el HEX correcto
+        dot.style.background = item.color.startsWith('#') ? item.color : '#' + item.color;
+    } else {
+        dot.style.background = '#7880a0';
+    }
+    
+    const label = document.createElement('span');
+    label.className = 'summary-label';
+    label.textContent = item.val;
+    
+    const count = document.createElement('span');
+    count.className = 'summary-count';
+    count.textContent = item.n;
+    
+    div.appendChild(dot);
+    div.appendChild(label);
+    div.appendChild(count);
+    bar.appendChild(div);
+  });
+}
+
+workerSelect.addEventListener('change', renderAll);
+monthSelect.addEventListener('change', renderAll);
+
+// Initial render
+renderAll();
+</script>
+</body>
+</html>
