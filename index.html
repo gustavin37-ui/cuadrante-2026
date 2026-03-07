@@ -16,7 +16,7 @@
     --text-muted: #7880a0;
     --accent: #4e82ee;
     --accent2: #7c5cfc;
-    --weekend-bg: rgba(255,120,50,0.15); /* Un poco más intenso para que se vea bien */
+    --weekend-bg: rgba(255,120,50,0.12);
     --weekend-text: #ff7832;
     --header-h: 64px;
   }
@@ -201,7 +201,7 @@
 
   .cuadrante-table th.weekend-th {
     color: var(--weekend-text);
-    background: rgba(255,120,50,0.12) !important;
+    background: rgba(255,120,50,0.06);
   }
 
   .cuadrante-table td {
@@ -232,6 +232,7 @@
     filter: brightness(1.1);
   }
 
+  /* Cell with color */
   .cell-val {
     display: inline-block;
     padding: 2px 4px;
@@ -244,9 +245,17 @@
     text-align: center;
   }
 
-  /* Estilo especial para celdas de Fin de Semana o Festivos */
+  .cell-val.dark-text { color: #1a1d27; }
+
+  .cell-empty-weekend {
+    background: var(--weekend-bg);
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
   .cuadrante-table td.weekend-td {
-    background: var(--weekend-bg) !important;
+    background: rgba(255,120,50,0.05);
   }
 
   /* SUMMARY BAR */
@@ -260,7 +269,41 @@
     border-bottom: 1px solid var(--border);
     margin-bottom: 20px;
   }
-  /* ... resto de estilos de summary igual ... */
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+  }
+  .summary-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .summary-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .summary-count {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+  }
+
+  /* PRINT */
+  @media print {
+    :root { --bg: #fff; --surface: #fff; --surface2: #f0f0f0; --border: #ccc; --text: #000; --text-muted: #666; }
+    header, .legend, .summary-bar { display: none; }
+    main { padding: 0; }
+    .month-section { page-break-inside: avoid; margin-bottom: 20px; }
+    body { background: white; color: black; }
+    .cuadrante-table td.worker-name { background: #f5f5f5; color: #000; }
+    .cuadrante-table th { background: #e0e0e0; color: #444; }
+  }
 </style>
 </head>
 <body>
@@ -282,30 +325,32 @@
 
 <div class="legend">
   <span class="legend-title">Leyenda:</span>
-  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9/TT</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> Libranza</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> Guardias FSM</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> Guardias Justicia</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#F8CBAD"></div> Guardias Bomberos</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#ace887"></div> Localizados</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> Vacaciones</div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--weekend-text)"></div> Fin de semana / Festivo</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> L (Libre)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> FSM / FSMF / FSM112</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#70AD47"></div> VC / LOC / Guardia</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> G / GF / GFF</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#44546A"></div> 112M / 112T / LOC112</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F2B800"></div> TT</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> V</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,120,50,0.3); border:1px solid rgba(255,120,50,0.5)"></div> Fin de semana</div>
 </div>
 
 <div id="summary-bar" class="summary-bar" style="display:none"></div>
 
 <main id="main-content">
-  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">Cargando cuadrante...</div>
+  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">
+    Cargando cuadrante desde la nube...<br>
+    <small style="opacity: 0.6; display: block; margin-top: 10px;">(Esto puede tardar unos segundos)</small>
+  </div>
 </main>
-
-<script src="datos.js"></script>
 
 <script>
 
+const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?output=csv";
 
-
-const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?gid=0&single=true&output=csv"; 
-
+// Variable global vacía que llenaremos con los datos de Google
+let DATA = null; 
 
 // ==========================================
 // CONFIGURACIÓN DE FESTIVOS 2026
@@ -328,6 +373,7 @@ const FESTIVOS_2026 = {
 
 const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
+
 // Función para convertir "Lu." en "LUNES"
 function getDiaCompleto(abreviatura) {
     const dia = abreviatura.toLowerCase().replace('.', '').trim();
@@ -343,6 +389,10 @@ function getDiaCompleto(abreviatura) {
     return nombres[dia] || abreviatura.toUpperCase();
 }
 
+
+// =======================================================================
+// 2. EL DICCIONARIO MÁGICO
+// =======================================================================
 const MAPEO_TURNOS = {
   "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
   "3": { texto: "GUARDIA BOMBEROS",   bg: "#F8CBAD", color: "#000000" }, 
@@ -372,45 +422,69 @@ const MAPEO_TURNOS = {
   "B":       { texto: "BAJA",       bg: "#595959", color: "#FFFFFF" } 
 };
 
-// ... funciones de color auxiliares igual ...
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(0,2),16);
-  const g = parseInt(hex.slice(2,4),16);
-  const b = parseInt(hex.slice(4,6),16);
-  return [r,g,b];
-}
-function luminance(hex) {
-  const [r,g,b] = hexToRgb(hex).map(v => v/255);
-  return 0.299*r + 0.587*g + 0.114*b;
-}
-function textColor(bgHex) {
-  return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
-}
+// =======================================================================
+// 3. OBTENER DATOS DE GOOGLE SHEETS
+// =======================================================================
+fetch(GOOGLE_CSV_URL)
+  .then(respuesta => respuesta.text())
+  .then(csvText => {
+      // Limpiamos el texto que viene de Google
+      let lineas = csvText.split('\n').filter(linea => linea.trim() !== '');
+      let ultimaLinea = lineas[lineas.length - 1];
+      
+      // NUEVO: Buscamos exactamente dónde empieza y acaba el JSON
+      // para ignorar la columna secreta "__PowerAppsId__"
+      let inicio = ultimaLinea.indexOf('{');
+      let fin = ultimaLinea.lastIndexOf('}');
+      
+      if (inicio === -1 || fin === -1) throw new Error("No hay JSON válido");
+      
+      // Recortamos solo la parte de los datos
+      let soloJson = ultimaLinea.substring(inicio, fin + 1);
+      
+      // Limpiamos las comillas extra de Google
+      let jsonLimpio = soloJson.replace(/""/g, '"');
+      
+      // Convertimos a datos
+      DATA = JSON.parse(jsonLimpio);
+      
+      // Arrancamos la aplicación
+      inicializarApp();
+  })
+  .catch(error => {
+      document.getElementById('loading').innerHTML = '<span style="color:#ff7832">Error leyendo el formato de los datos.</span>';
+      console.error("Error leyendo datos:", error);
+  });
 
-const workerSelect = document.getElementById('worker-select');
-const monthSelect = document.getElementById('month-select');
+// =======================================================================
+// 4. LÓGICA DE LA APLICACIÓN (Adaptada para datos comprimidos)
+// =======================================================================
+function inicializarApp() {
+    const workerSelect = document.getElementById('worker-select');
+    const monthSelect = document.getElementById('month-select');
 
-// Llenar selectores
-DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
-  const opt = document.createElement('option');
-  opt.value = p;
-  opt.textContent = p;
-  workerSelect.appendChild(opt);
-});
+    DATA.p.filter(p => !p.includes('VACANTE')).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      workerSelect.appendChild(opt);
+    });
 
-MONTHS_ORDER.forEach((m) => {
-  const opt = document.createElement('option');
-  opt.value = m;
-  opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
-  monthSelect.appendChild(opt);
-});
+    MONTHS_ORDER.forEach((m) => {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+      monthSelect.appendChild(opt);
+    });
+
+    workerSelect.addEventListener('change', renderAll);
+    monthSelect.addEventListener('change', renderAll);
+    renderAll();
+}
 
 function renderAll() {
-  const selectedWorker = workerSelect.value;
-  const selectedMonth = monthSelect.value;
+  const selectedWorker = document.getElementById('worker-select').value;
+  const selectedMonth = document.getElementById('month-select').value;
   const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
-  const workers = selectedWorker === 'ALL' ? DATA.personas.filter(p => !p.includes('VACANTE')) : [selectedWorker];
-
+  const workers = selectedWorker === 'ALL' ? DATA.p.filter(p => !p.includes('VACANTE')) : [selectedWorker];
   const main = document.getElementById('main-content');
   main.innerHTML = '';
 
@@ -418,7 +492,7 @@ function renderAll() {
   else document.getElementById('summary-bar').style.display = 'none';
 
   months.forEach(monthName => {
-    const mdata = DATA.meses[monthName];
+    const mdata = DATA.m[monthName];
     if (!mdata) return;
 
     const section = document.createElement('div');
@@ -431,15 +505,11 @@ function renderAll() {
     const headerRow = document.createElement('tr');
     headerRow.innerHTML = `<th class="worker-col">Trabajador</th>`;
 
-    mdata.days.forEach(day => {
+    mdata.d.forEach(day => {
       const th = document.createElement('th');
-      const esFindel = day.name.includes('Sá') || day.name.includes('Do');
-      const esFestivo = (FESTIVOS_2026[monthName] || []).includes(parseInt(day.num));
-
-      if (esFindel || esFestivo) th.className = 'weekend-th';
-      
-      // CAMBIO: Nombre del día completo
-      th.innerHTML = `<div>${day.num}</div><div style="font-size:8px; opacity:0.7">${getDiaCompleto(day.name)}</div>`;
+      const isWE = day.nm.includes('Sá') || day.nm.includes('Do') || day.nm.includes('Sa');
+      if (isWE) th.className = 'weekend-th';
+      th.innerHTML = `<div>${day.n}</div><div style="font-size:9px;opacity:0.7">${day.nm}</div>`;
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -447,39 +517,31 @@ function renderAll() {
 
     const tbody = document.createElement('tbody');
     workers.forEach(worker => {
-      const shifts = mdata.workers[worker];
-      if (!shifts) return;
+      const shiftString = mdata.w[worker];
+      if (!shiftString && selectedWorker === 'ALL') return; // Salta si no tiene turnos
 
+      const shifts = shiftString ? shiftString.split(',') : new Array(mdata.d.length).fill("");
       const tr = document.createElement('tr');
       tr.innerHTML = `<td class="worker-name">${worker}</td>`;
 
-      shifts.forEach((shift, i) => {
+      shifts.forEach((shiftVal, i) => {
         const td = document.createElement('td');
-        const day = mdata.days[i];
-        const esFindel = day.name.includes('Sá') || day.name.includes('Do');
-        const esFestivo = (FESTIVOS_2026[monthName] || []).includes(parseInt(day.num));
+        const dayData = mdata.d[i];
+        const isWE = dayData && (dayData.nm.includes('Sá') || dayData.nm.includes('Do') || dayData.nm.includes('Sa'));
+        if (isWE) td.className = 'weekend-td';
 
-        // CAMBIO: Pintar fondo si es finde o festivo
-        if (esFindel || esFestivo) td.className = 'weekend-td';
-
-        if (shift.val !== null && shift.val !== undefined && String(shift.val).trim() !== "") {
-          let valToDisplay = shift.val;
-          let valKey = String(shift.val).trim().toUpperCase();
-          let bgToDisplay = shift.color ? '#' + shift.color : '';
-          let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
-
-          if (MAPEO_TURNOS[valKey]) {
-            valToDisplay = MAPEO_TURNOS[valKey].texto;
-            bgToDisplay = MAPEO_TURNOS[valKey].bg;
-            colorToDisplay = MAPEO_TURNOS[valKey].color;
-          }
-
-          if (bgToDisplay) {
-            td.innerHTML = `<span class="cell-val" style="background-color:${bgToDisplay}; color:${colorToDisplay}">${valToDisplay}</span>`;
+        if (shiftVal !== "") {
+          let valKey = shiftVal.trim().toUpperCase();
+          let config = MAPEO_TURNOS[valKey];
+          
+          if (config && config.bg) {
+            td.innerHTML = `<span class="cell-val" style="background-color:${config.bg}; color:${config.color}">${config.texto}</span>`;
           } else {
-            td.textContent = valToDisplay;
-            td.style.color = colorToDisplay;
+            td.textContent = shiftVal;
+            td.style.fontWeight = '500';
           }
+        } else if (isWE) {
+          td.style.background = 'rgba(255,120,50,0.07)';
         }
         tr.appendChild(td);
       });
@@ -491,26 +553,22 @@ function renderAll() {
   });
 }
 
-// ... resto de funciones (renderSummary) igual ...
 function renderSummary(worker, months) {
   const bar = document.getElementById('summary-bar');
   bar.style.display = 'flex';
   const counts = {};
   
   months.forEach(monthName => {
-    const mdata = DATA.meses[monthName];
-    if (!mdata || !mdata.workers[worker]) return;
+    const mdata = DATA.m[monthName];
+    if (!mdata || !mdata.w[worker]) return;
     
-    mdata.workers[worker].forEach(shift => {
-      if (shift.val !== null && shift.val !== undefined && String(shift.val).trim() !== "") {
-        let valKey = String(shift.val).trim().toUpperCase();
-        let displayVal = shift.val;
-        let displayColor = shift.color ? '#' + shift.color : 'none';
-
-        if (MAPEO_TURNOS[valKey]) {
-          displayVal = MAPEO_TURNOS[valKey].texto;
-          displayColor = MAPEO_TURNOS[valKey].bg;
-        }
+    const shifts = mdata.w[worker].split(',');
+    shifts.forEach(shiftVal => {
+      if (shiftVal !== "") {
+        let valKey = shiftVal.trim().toUpperCase();
+        let config = MAPEO_TURNOS[valKey];
+        let displayVal = config ? config.texto : shiftVal;
+        let displayColor = config ? config.bg : 'none';
 
         const key = displayVal + '|' + displayColor;
         if (!counts[key]) counts[key] = { val: displayVal, color: displayColor, n: 0 };
@@ -524,15 +582,11 @@ function renderSummary(worker, months) {
   Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
     const div = document.createElement('div');
     div.className = 'summary-item';
-    const dotColor = item.color !== 'none' ? (item.color.startsWith('#') ? item.color : '#' + item.color) : '#7880a0';
-    div.innerHTML = `<div class="summary-dot" style="background:${dotColor}"></div><span class="summary-label">${item.val}</span><span class="summary-count">${item.n}</span>`;
+    const bgStyle = item.color !== 'none' ? `background:${item.color}` : `background:#7880a0`;
+    div.innerHTML = `<div class="summary-dot" style="${bgStyle}"></div><span class="summary-label">${item.val}</span><span class="summary-count">${item.n}</span>`;
     bar.appendChild(div);
   });
 }
-
-workerSelect.addEventListener('change', renderAll);
-monthSelect.addEventListener('change', renderAll);
-renderAll();
 </script>
 </body>
 </html>
