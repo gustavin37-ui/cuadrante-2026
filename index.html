@@ -414,95 +414,59 @@ fetch(GOOGLE_CSV_URL)
 
 
 // =======================================================================
-// 4. LÓGICA DE LA APLICACIÓN
+// 4. LÓGICA DE LA APLICACIÓN (Adaptada para datos comprimidos)
 // =======================================================================
 function inicializarApp() {
     const workerSelect = document.getElementById('worker-select');
     const monthSelect = document.getElementById('month-select');
 
-    // Llenar selectores
-    DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
+    DATA.p.filter(p => !p.includes('VACANTE')).forEach(p => {
       const opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
+      opt.value = p; opt.textContent = p;
       workerSelect.appendChild(opt);
     });
 
     MONTHS_ORDER.forEach((m) => {
       const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+      opt.value = m; opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
       monthSelect.appendChild(opt);
     });
 
-    // Eventos
     workerSelect.addEventListener('change', renderAll);
     monthSelect.addEventListener('change', renderAll);
-
-    // Dibujar la tabla por primera vez
     renderAll();
-}
-
-// Helpers de Color
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(0,2),16);
-  const g = parseInt(hex.slice(2,4),16);
-  const b = parseInt(hex.slice(4,6),16);
-  return [r,g,b];
-}
-function luminance(hex) {
-  const [r,g,b] = hexToRgb(hex).map(v => v/255);
-  return 0.299*r + 0.587*g + 0.114*b;
-}
-function textColor(bgHex) {
-  return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
 }
 
 function renderAll() {
   const selectedWorker = document.getElementById('worker-select').value;
   const selectedMonth = document.getElementById('month-select').value;
-
   const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
-  const workers = selectedWorker === 'ALL'
-    ? DATA.personas.filter(p => !p.includes('VACANTE'))
-    : [selectedWorker];
-
+  const workers = selectedWorker === 'ALL' ? DATA.p.filter(p => !p.includes('VACANTE')) : [selectedWorker];
   const main = document.getElementById('main-content');
   main.innerHTML = '';
 
-  if (selectedWorker !== 'ALL') {
-    renderSummary(selectedWorker, months);
-  } else {
-    document.getElementById('summary-bar').style.display = 'none';
-  }
+  if (selectedWorker !== 'ALL') renderSummary(selectedWorker, months);
+  else document.getElementById('summary-bar').style.display = 'none';
 
   months.forEach(monthName => {
-    const mdata = DATA.meses[monthName];
+    const mdata = DATA.m[monthName];
     if (!mdata) return;
 
     const section = document.createElement('div');
     section.className = 'month-section';
-
-    const mh = document.createElement('div');
-    mh.className = 'month-header';
-    mh.innerHTML = `<span class="month-name">${monthName}</span><div class="month-line"></div>`;
-    section.appendChild(mh);
+    section.innerHTML = `<div class="month-header"><span class="month-name">${monthName}</span><div class="month-line"></div></div>`;
 
     const table = document.createElement('table');
     table.className = 'cuadrante-table';
-
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    const thName = document.createElement('th');
-    thName.className = 'worker-col';
-    thName.textContent = 'Trabajador';
-    headerRow.appendChild(thName);
+    headerRow.innerHTML = `<th class="worker-col">Trabajador</th>`;
 
-    mdata.days.forEach(day => {
+    mdata.d.forEach(day => {
       const th = document.createElement('th');
-      const isWE = day.name.includes('Sá') || day.name.includes('Do');
+      const isWE = day.nm.includes('Sá') || day.nm.includes('Do') || day.nm.includes('Sa');
       if (isWE) th.className = 'weekend-th';
-      th.innerHTML = `<div>${day.num}</div><div style="font-size:9px;opacity:0.7">${day.name.replace('.','')}</div>`;
+      th.innerHTML = `<div>${day.n}</div><div style="font-size:9px;opacity:0.7">${day.nm}</div>`;
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -510,54 +474,36 @@ function renderAll() {
 
     const tbody = document.createElement('tbody');
     workers.forEach(worker => {
-      const shifts = mdata.workers[worker];
-      if (!shifts) return;
+      const shiftString = mdata.w[worker];
+      if (!shiftString && selectedWorker === 'ALL') return; // Salta si no tiene turnos
 
+      const shifts = shiftString ? shiftString.split(',') : new Array(mdata.d.length).fill("");
       const tr = document.createElement('tr');
-      const tdName = document.createElement('td');
-      tdName.className = 'worker-name';
-      tdName.textContent = worker;
-      tr.appendChild(tdName);
+      tr.innerHTML = `<td class="worker-name">${worker}</td>`;
 
-      shifts.forEach((shift, i) => {
+      shifts.forEach((shiftVal, i) => {
         const td = document.createElement('td');
-        const isWE = mdata.days[i] && (mdata.days[i].name.includes('Sá') || mdata.days[i].name.includes('Do'));
+        const dayData = mdata.d[i];
+        const isWE = dayData && (dayData.nm.includes('Sá') || dayData.nm.includes('Do') || dayData.nm.includes('Sa'));
         if (isWE) td.className = 'weekend-td';
 
-        if (shift.val !== null && shift.val !== undefined) {
-          let valToDisplay = shift.val;
-          let valKey = String(shift.val).trim().toUpperCase();
-          let bgToDisplay = shift.color ? '#' + shift.color : '';
-          let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
-
-          if (MAPEO_TURNOS[valKey]) {
-            valToDisplay = MAPEO_TURNOS[valKey].texto;
-            bgToDisplay = MAPEO_TURNOS[valKey].bg;
-            colorToDisplay = MAPEO_TURNOS[valKey].color;
-          }
-
-          if (bgToDisplay) {
-            const span = document.createElement('span');
-            span.className = 'cell-val';
-            span.style.backgroundColor = bgToDisplay;
-            span.style.color = colorToDisplay;
-            span.textContent = valToDisplay;
-            td.appendChild(span);
+        if (shiftVal !== "") {
+          let valKey = shiftVal.trim().toUpperCase();
+          let config = MAPEO_TURNOS[valKey];
+          
+          if (config && config.bg) {
+            td.innerHTML = `<span class="cell-val" style="background-color:${config.bg}; color:${config.color}">${config.texto}</span>`;
           } else {
-            td.textContent = valToDisplay;
-            td.style.color = colorToDisplay;
+            td.textContent = shiftVal;
             td.style.fontWeight = '500';
           }
         } else if (isWE) {
           td.style.background = 'rgba(255,120,50,0.07)';
         }
-
         tr.appendChild(td);
       });
-
       tbody.appendChild(tr);
     });
-
     table.appendChild(tbody);
     section.appendChild(table);
     main.appendChild(section);
@@ -570,19 +516,16 @@ function renderSummary(worker, months) {
   const counts = {};
   
   months.forEach(monthName => {
-    const mdata = DATA.meses[monthName];
-    if (!mdata || !mdata.workers[worker]) return;
+    const mdata = DATA.m[monthName];
+    if (!mdata || !mdata.w[worker]) return;
     
-    mdata.workers[worker].forEach(shift => {
-      if (shift.val !== null && shift.val !== undefined) {
-        let valKey = String(shift.val).trim().toUpperCase();
-        let displayVal = shift.val;
-        let displayColor = shift.color ? '#' + shift.color : 'none';
-
-        if (MAPEO_TURNOS[valKey]) {
-          displayVal = MAPEO_TURNOS[valKey].texto;
-          displayColor = MAPEO_TURNOS[valKey].bg;
-        }
+    const shifts = mdata.w[worker].split(',');
+    shifts.forEach(shiftVal => {
+      if (shiftVal !== "") {
+        let valKey = shiftVal.trim().toUpperCase();
+        let config = MAPEO_TURNOS[valKey];
+        let displayVal = config ? config.texto : shiftVal;
+        let displayColor = config ? config.bg : 'none';
 
         const key = displayVal + '|' + displayColor;
         if (!counts[key]) counts[key] = { val: displayVal, color: displayColor, n: 0 };
@@ -591,31 +534,13 @@ function renderSummary(worker, months) {
     });
   });
 
-  bar.innerHTML = '<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ' + worker + ':</span>';
+  bar.innerHTML = `<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ${worker}:</span>`;
 
   Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
     const div = document.createElement('div');
     div.className = 'summary-item';
-    
-    const dot = document.createElement('div');
-    dot.className = 'summary-dot';
-    if (item.color !== 'none') {
-        dot.style.background = item.color.startsWith('#') ? item.color : '#' + item.color;
-    } else {
-        dot.style.background = '#7880a0';
-    }
-    
-    const label = document.createElement('span');
-    label.className = 'summary-label';
-    label.textContent = item.val;
-    
-    const count = document.createElement('span');
-    count.className = 'summary-count';
-    count.textContent = item.n;
-    
-    div.appendChild(dot);
-    div.appendChild(label);
-    div.appendChild(count);
+    const bgStyle = item.color !== 'none' ? `background:${item.color}` : `background:#7880a0`;
+    div.innerHTML = `<div class="summary-dot" style="${bgStyle}"></div><span class="summary-label">${item.val}</span><span class="summary-count">${item.n}</span>`;
     bar.appendChild(div);
   });
 }
