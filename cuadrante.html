@@ -339,16 +339,24 @@
 <div id="summary-bar" class="summary-bar" style="display:none"></div>
 
 <main id="main-content">
-  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">Cargando cuadrante...</div>
+  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">
+    Cargando cuadrante desde la nube...<br>
+    <small style="opacity: 0.6; display: block; margin-top: 10px;">(Esto puede tardar unos segundos)</small>
+  </div>
 </main>
-
-<script src="datos.js"></script>
 
 <script>
 
+const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?output=csv";
+
+// Variable global vacía que llenaremos con los datos de Google
+let DATA = null; 
+
 const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
-// 🎯 EL DICCIONARIO MÁGICO: Traduce los números y fuerza colores perfectos
+// =======================================================================
+// 2. EL DICCIONARIO MÁGICO
+// =======================================================================
 const MAPEO_TURNOS = {
   "1": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
   "3": { texto: "G",   bg: "#F8CBAD", color: "#000000" }, 
@@ -378,7 +386,64 @@ const MAPEO_TURNOS = {
   "B":       { texto: "B",       bg: "#595959", color: "#FFFFFF" } 
 };
 
-// Color helpers
+// =======================================================================
+// 3. OBTENER DATOS DE GOOGLE SHEETS
+// =======================================================================
+fetch(GOOGLE_CSV_URL)
+  .then(respuesta => respuesta.text())
+  .then(csvText => {
+      // Limpiamos el texto que viene de Google
+      let lineas = csvText.split('\n').filter(linea => linea.trim() !== '');
+      
+      // Cogemos siempre la ÚLTIMA línea (los datos más recientes)
+      let ultimaLinea = lineas[lineas.length - 1];
+      
+      // Limpiamos las comillas extra de Google
+      let jsonLimpio = ultimaLinea.replace(/^"|"$/g, '').replace(/""/g, '"');
+      
+      // Convertimos el texto en los datos del cuadrante
+      DATA = JSON.parse(jsonLimpio);
+      
+      // Arrancamos la aplicación
+      inicializarApp();
+  })
+  .catch(error => {
+      document.getElementById('loading').innerHTML = '<span style="color:#ff7832">Error de conexión. Asegúrate de que el enlace de Google Sheets es correcto y público.</span>';
+      console.error("Error leyendo datos:", error);
+  });
+
+
+// =======================================================================
+// 4. LÓGICA DE LA APLICACIÓN
+// =======================================================================
+function inicializarApp() {
+    const workerSelect = document.getElementById('worker-select');
+    const monthSelect = document.getElementById('month-select');
+
+    // Llenar selectores
+    DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      workerSelect.appendChild(opt);
+    });
+
+    MONTHS_ORDER.forEach((m) => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+      monthSelect.appendChild(opt);
+    });
+
+    // Eventos
+    workerSelect.addEventListener('change', renderAll);
+    monthSelect.addEventListener('change', renderAll);
+
+    // Dibujar la tabla por primera vez
+    renderAll();
+}
+
+// Helpers de Color
 function hexToRgb(hex) {
   const r = parseInt(hex.slice(0,2),16);
   const g = parseInt(hex.slice(2,4),16);
@@ -393,29 +458,9 @@ function textColor(bgHex) {
   return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
 }
 
-// Populate selects
-const workerSelect = document.getElementById('worker-select');
-const monthSelect = document.getElementById('month-select');
-
-// Workers (exclude VACANTE)
-DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
-  const opt = document.createElement('option');
-  opt.value = p;
-  opt.textContent = p;
-  workerSelect.appendChild(opt);
-});
-
-MONTHS_ORDER.forEach((m, i) => {
-  const opt = document.createElement('option');
-  opt.value = m;
-  opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
-  monthSelect.appendChild(opt);
-});
-
-// Render
 function renderAll() {
-  const selectedWorker = workerSelect.value;
-  const selectedMonth = monthSelect.value;
+  const selectedWorker = document.getElementById('worker-select').value;
+  const selectedMonth = document.getElementById('month-select').value;
 
   const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
   const workers = selectedWorker === 'ALL'
@@ -425,7 +470,6 @@ function renderAll() {
   const main = document.getElementById('main-content');
   main.innerHTML = '';
 
-  // Summary (only for single worker)
   if (selectedWorker !== 'ALL') {
     renderSummary(selectedWorker, months);
   } else {
@@ -439,17 +483,14 @@ function renderAll() {
     const section = document.createElement('div');
     section.className = 'month-section';
 
-    // Month header
     const mh = document.createElement('div');
     mh.className = 'month-header';
     mh.innerHTML = `<span class="month-name">${monthName}</span><div class="month-line"></div>`;
     section.appendChild(mh);
 
-    // Table
     const table = document.createElement('table');
     table.className = 'cuadrante-table';
 
-    // Header row
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
     const thName = document.createElement('th');
@@ -467,7 +508,6 @@ function renderAll() {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // Body rows
     const tbody = document.createElement('tbody');
     workers.forEach(worker => {
       const shifts = mdata.workers[worker];
@@ -479,19 +519,17 @@ function renderAll() {
       tdName.textContent = worker;
       tr.appendChild(tdName);
 
-shifts.forEach((shift, i) => {
+      shifts.forEach((shift, i) => {
         const td = document.createElement('td');
         const isWE = mdata.days[i] && (mdata.days[i].name.includes('Sá') || mdata.days[i].name.includes('Do'));
         if (isWE) td.className = 'weekend-td';
 
         if (shift.val !== null && shift.val !== undefined) {
-          // Valores por defecto
           let valToDisplay = shift.val;
           let valKey = String(shift.val).trim().toUpperCase();
           let bgToDisplay = shift.color ? '#' + shift.color : '';
           let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
 
-          // Traducir si existe en el diccionario
           if (MAPEO_TURNOS[valKey]) {
             valToDisplay = MAPEO_TURNOS[valKey].texto;
             bgToDisplay = MAPEO_TURNOS[valKey].bg;
@@ -506,7 +544,6 @@ shifts.forEach((shift, i) => {
             span.textContent = valToDisplay;
             td.appendChild(span);
           } else {
-            // Sin color (P, etc.)
             td.textContent = valToDisplay;
             td.style.color = colorToDisplay;
             td.style.fontWeight = '500';
@@ -542,7 +579,6 @@ function renderSummary(worker, months) {
         let displayVal = shift.val;
         let displayColor = shift.color ? '#' + shift.color : 'none';
 
-        // Traducimos también para el resumen
         if (MAPEO_TURNOS[valKey]) {
           displayVal = MAPEO_TURNOS[valKey].texto;
           displayColor = MAPEO_TURNOS[valKey].bg;
@@ -564,7 +600,6 @@ function renderSummary(worker, months) {
     const dot = document.createElement('div');
     dot.className = 'summary-dot';
     if (item.color !== 'none') {
-        // Asegurarnos de que coge el HEX correcto
         dot.style.background = item.color.startsWith('#') ? item.color : '#' + item.color;
     } else {
         dot.style.background = '#7880a0';
@@ -584,12 +619,6 @@ function renderSummary(worker, months) {
     bar.appendChild(div);
   });
 }
-
-workerSelect.addEventListener('change', renderAll);
-monthSelect.addEventListener('change', renderAll);
-
-// Initial render
-renderAll();
 </script>
 </body>
 </html>
