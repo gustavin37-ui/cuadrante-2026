@@ -394,24 +394,31 @@ fetch(GOOGLE_CSV_URL)
   .then(csvText => {
       // Limpiamos el texto que viene de Google
       let lineas = csvText.split('\n').filter(linea => linea.trim() !== '');
-      
-      // Cogemos siempre la ÚLTIMA línea (los datos más recientes)
       let ultimaLinea = lineas[lineas.length - 1];
       
-      // Limpiamos las comillas extra de Google
-      let jsonLimpio = ultimaLinea.replace(/^"|"$/g, '').replace(/""/g, '"');
+      // NUEVO: Buscamos exactamente dónde empieza y acaba el JSON
+      // para ignorar la columna secreta "__PowerAppsId__"
+      let inicio = ultimaLinea.indexOf('{');
+      let fin = ultimaLinea.lastIndexOf('}');
       
-      // Convertimos el texto en los datos del cuadrante
+      if (inicio === -1 || fin === -1) throw new Error("No hay JSON válido");
+      
+      // Recortamos solo la parte de los datos
+      let soloJson = ultimaLinea.substring(inicio, fin + 1);
+      
+      // Limpiamos las comillas extra de Google
+      let jsonLimpio = soloJson.replace(/""/g, '"');
+      
+      // Convertimos a datos
       DATA = JSON.parse(jsonLimpio);
       
       // Arrancamos la aplicación
       inicializarApp();
   })
   .catch(error => {
-      document.getElementById('loading').innerHTML = '<span style="color:#ff7832">Error de conexión. Asegúrate de que el enlace de Google Sheets es correcto y público.</span>';
+      document.getElementById('loading').innerHTML = '<span style="color:#ff7832">Error leyendo el formato de los datos.</span>';
       console.error("Error leyendo datos:", error);
   });
-
 
 // =======================================================================
 // 4. LÓGICA DE LA APLICACIÓN (Adaptada para datos comprimidos)
