@@ -16,42 +16,251 @@
     --text-muted: #7880a0;
     --accent: #4e82ee;
     --accent2: #7c5cfc;
-    --weekend-bg: rgba(255,120,50,0.15);
+    --weekend-bg: rgba(255,120,50,0.15); /* Un poco más intenso para que se vea bien */
     --weekend-text: #ff7832;
     --header-h: 64px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
-  header { height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
-  .logo { font-size: 18px; font-weight: 700; color: var(--text); }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    height: var(--header-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    white-space: nowrap;
+  }
   .logo span { color: var(--accent); }
-  .controls { display: flex; align-items: center; gap: 12px; flex: 1; }
-  select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 14px; min-width: 180px; }
 
-  .legend { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; }
-  .legend-dot { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
 
-  main { flex: 1; padding: 20px 24px 40px; overflow-x: auto; }
-  .month-section { margin-bottom: 28px; }
-  .month-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; text-transform: uppercase; font-weight: 700; color: var(--accent); }
+  label {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
 
-  .cuadrante-table { border-collapse: collapse; width: 100%; min-width: 900px; font-family: 'DM Mono', monospace; font-size: 11px; table-layout: fixed; }
-  .cuadrante-table th, .cuadrante-table td { border: 1px solid var(--border); text-align: center; vertical-align: middle; height: 38px; }
-  
-  .cuadrante-table th { background: var(--surface2); color: var(--text-muted); font-size: 9px; }
-  .cuadrante-table th.worker-col { text-align: left; padding: 0 10px; width: 150px; background: var(--surface); }
-  .cuadrante-table th.weekend-th { color: var(--weekend-text); background: rgba(255,120,50,0.05); }
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 180px;
+  }
+  select:focus, select:hover { border-color: var(--accent); }
 
-  .cuadrante-table td.worker-name { text-align: left; padding: 0 10px; font-family: 'DM Sans'; font-weight: 600; background: var(--surface); position: sticky; left: 0; z-index: 2; }
-  .cuadrante-table td.weekend-td { background: var(--weekend-bg) !important; }
+  .print-btn {
+    margin-left: auto;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .print-btn:hover { opacity: 0.85; }
 
-  .cell-val { display: inline-block; padding: 2px 4px; border-radius: 4px; font-weight: 700; font-size: 10px; color: #fff; min-width: 24px; }
-  
-  .summary-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 24px; background: var(--surface); border-top: 1px solid var(--border); margin-bottom: 10px; }
-  .summary-item { display: flex; align-items: center; gap: 6px; background: var(--surface2); padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-  .summary-dot { width: 8px; height: 8px; border-radius: 2px; }
+  /* LEGEND */
+  .legend {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .legend-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* MAIN CONTENT */
+  main {
+    flex: 1;
+    padding: 20px 24px 40px;
+    overflow-x: auto;
+  }
+
+  /* MONTH SECTION */
+  .month-section {
+    margin-bottom: 28px;
+  }
+
+  .month-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .month-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .month-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* TABLE */
+  .cuadrante-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 900px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  .cuadrante-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 4px;
+    text-align: center;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    min-width: 32px;
+  }
+
+  .cuadrante-table th.worker-col {
+    text-align: left;
+    padding: 5px 10px;
+    min-width: 120px;
+    background: var(--surface);
+  }
+
+  .cuadrante-table th.weekend-th {
+    color: var(--weekend-text);
+    background: rgba(255,120,50,0.12) !important;
+  }
+
+  .cuadrante-table td {
+    border: 1px solid var(--border);
+    padding: 4px 3px;
+    text-align: center;
+    vertical-align: middle;
+    transition: filter 0.1s;
+    min-width: 32px;
+  }
+
+  .cuadrante-table td.worker-name {
+    text-align: left;
+    padding: 5px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .cuadrante-table tr:hover td:not(.worker-name) {
+    filter: brightness(1.1);
+  }
+
+  .cell-val {
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    min-width: 28px;
+    text-align: center;
+  }
+
+  /* Estilo especial para celdas de Fin de Semana o Festivos */
+  .cuadrante-table td.weekend-td {
+    background: var(--weekend-bg) !important;
+  }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  /* ... resto de estilos de summary igual ... */
 </style>
 </head>
 <body>
@@ -59,144 +268,271 @@
 <header>
   <div class="logo">Cuadrante <span>2026</span></div>
   <div class="controls">
-    <select id="worker-select"><option value="ALL">— Todos los trabajadores —</option></select>
-    <select id="month-select"><option value="ALL">— Todos los meses —</option></select>
+    <label for="worker-select">Trabajador:</label>
+    <select id="worker-select">
+      <option value="ALL">— Todos —</option>
+    </select>
+    <label for="month-select" style="margin-left:12px">Mes:</label>
+    <select id="month-select">
+      <option value="ALL">— Todos los meses —</option>
+    </select>
   </div>
+  <button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
 </header>
 
 <div class="legend">
-  <div style="margin-right:10px; color:var(--text-muted)">LEYENDA:</div>
-  <div style="display:flex; gap:15px; flex-wrap:wrap;">
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9/TT</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#00B0F0"></div> Libranza</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#FF0000"></div> FSM</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#B4C6E7"></div> G. Justicia</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#F8CBAD"></div> G. Bomberos</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:#ace887"></div> Localizados</div>
-    <div style="display:flex; align-items:center; gap:5px"><div class="legend-dot" style="background:var(--weekend-text)"></div> Festivo / Finde</div>
-  </div>
+  <span class="legend-title">Leyenda:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9/TT</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> Libranza</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> Guardias FSM</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> Guardias Justicia</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F8CBAD"></div> Guardias Bomberos</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ace887"></div> Localizados</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> Vacaciones</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--weekend-text)"></div> Fin de semana / Festivo</div>
 </div>
 
 <div id="summary-bar" class="summary-bar" style="display:none"></div>
 
 <main id="main-content">
-  <div id="loading" style="text-align:center;padding:60px;color:var(--text-muted)">Cargando datos actualizados...</div>
+  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">Cargando cuadrante...</div>
 </main>
 
+<script src="datos.js"></script>
+
 <script>
-// ==========================================
-// CONFIGURACIÓN (RECUERDA TU URL)
-// ==========================================
+
+
+
 const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?gid=0&single=true&output=csv"; 
 
+
+// ==========================================
+// CONFIGURACIÓN DE FESTIVOS 2026
+// Añade aquí los números de día que son festivos por mes
+// ==========================================
 const FESTIVOS_2026 = {
-    "ENERO": [1, 6], "MARZO": [19], "ABRIL": [2, 3], "MAYO": [1, 15], 
-    "AGOSTO": [15], "OCTUBRE": [12], "NOVIEMBRE": [9], "DICIEMBRE": [7, 8, 25]
+    "ENERO": [1, 6],
+    "FEBRERO": [],
+    "MARZO": [19],
+    "ABRIL": [2, 3],
+    "MAYO": [1],
+    "JUNIO": [],
+    "JULIO": [],
+    "AGOSTO": [15],
+    "SEPTIEMBRE": [],
+    "OCTUBRE": [12],
+    "NOVIEMBRE": [1, 9],
+    "DICIEMBRE": [6, 8, 25]
 };
 
 const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
+// Función para convertir "Lu." en "LUNES"
+function getDiaCompleto(abreviatura) {
+    const dia = abreviatura.toLowerCase().replace('.', '').trim();
+    const nombres = {
+        'lu': 'LUNES',
+        'ma': 'MARTES',
+        'mi': 'MIERCOLES',
+        'ju': 'JUEVES',
+        'vi': 'VIERNES',
+        'sá': 'SABADO',
+        'do': 'DOMINGO'
+    };
+    return nombres[dia] || abreviatura.toUpperCase();
+}
+
 const MAPEO_TURNOS = {
-  "1": { texto: "LOC", bg: "#ace887", color: "#000" }, 
-  "3": { texto: "GB",  bg: "#F8CBAD", color: "#000" }, 
-  "4": { texto: "GB",  bg: "#F8CBAD", color: "#000" }, 
-  "5": { texto: "GBF", bg: "#F8CBAD", color: "#000" }, 
-  "FSM": { texto: "FSM", bg: "#FF0000", color: "#fff" },
-  "FSMF": { texto: "FSMF", bg: "#FF0000", color: "#fff" },
-  "M7": { texto: "M7", bg: "#FFF2CC", color: "#000" }, 
-  "M8": { texto: "M8", bg: "#FFE699", color: "#000" }, 
-  "M9": { texto: "M9", bg: "#FFE699", color: "#000" }, 
-  "TT": { texto: "TT", bg: "#FFC000", color: "#000" }, 
-  "L": { texto: "L", bg: "#00B0F0", color: "#fff" }, 
-  "G": { texto: "GJ", bg: "#B4C6E7", color: "#000" }, 
-  "GF": { texto: "GJ", bg: "#B4C6E7", color: "#000" }, 
-  "GFF": { texto: "GJF", bg: "#B4C6E7", color: "#000" }, 
-  "V": { texto: "V", bg: "#92D050", color: "#000" }, 
-  "VC": { texto: "VC", bg: "#548235", color: "#fff" }, 
-  "B": { texto: "BAJA", bg: "#595959", color: "#fff" },
-  "P": { texto: "P", bg: "#A6A6A6", color: "#000" }
+  "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
+  "3": { texto: "GUARDIA BOMBEROS",   bg: "#F8CBAD", color: "#000000" }, 
+  "4": { texto: "GUARDIA BOMBEROS",  bg: "#F8CBAD", color: "#000000" }, 
+  "5": { texto: "GUARDIA BOMBEROS FESTIVO", bg: "#F8CBAD", color: "#000000" }, 
+  "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
+  "M7": { texto: "M7", bg: "#FFF2CC", color: "#000000" }, 
+  "M8": { texto: "M8", bg: "#FFE699", color: "#000000" }, 
+  "M9": { texto: "M9", bg: "#FFE699", color: "#000000" }, 
+  "TT": { texto: "TT", bg: "#FFC000", color: "#000000" }, 
+  "L":   { texto: "L",   bg: "#00B0F0", color: "#FFFFFF" }, 
+  "G":   { texto: "GUARDIA JUSTICIA",   bg: "#B4C6E7", color: "#000000" }, 
+  "GF":  { texto: "GUARDIA JSUTICIA",  bg: "#B4C6E7", color: "#000000" }, 
+  "GFF": { texto: "GUARDIA JUSTICIA FESTIVO", bg: "#B4C6E7", color: "#000000" }, 
+  "V":   { texto: "V",   bg: "#92D050", color: "#000000" }, 
+  "VC":  { texto: "VC",  bg: "#548235", color: "#FFFFFF" }, 
+  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
+  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
+  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
+  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
+  "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" }, 
+  "P":       { texto: "PERMISO",       bg: "#A6A6A6", color: "#000000" }, 
+  "B":       { texto: "BAJA",       bg: "#595959", color: "#FFFFFF" } 
 };
 
-let DATA = null;
-
-// ==========================================
-// CARGA DE DATOS
-// ==========================================
-fetch(GOOGLE_CSV_URL)
-  .then(res => res.text())
-  .then(csv => {
-      let lineas = csv.split('\n').filter(l => l.trim() !== '');
-      let u = lineas[lineas.length - 1];
-      let i = u.indexOf('{'), f = u.lastIndexOf('}');
-      if (i === -1) throw "Error JSON";
-      DATA = JSON.parse(u.substring(i, f + 1).replace(/""/g, '"'));
-      init();
-  })
-  .catch(e => document.getElementById('loading').innerText = "Error al conectar con los datos.");
-
-function init() {
-    const ws = document.getElementById('worker-select');
-    const ms = document.getElementById('month-select');
-    DATA.p.forEach(p => { let o = document.createElement('option'); o.value = p; o.textContent = p; ws.appendChild(o); });
-    MONTHS_ORDER.forEach(m => { let o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
-    ws.onchange = ms.onchange = render;
-    render();
+// ... funciones de color auxiliares igual ...
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(0,2),16);
+  const g = parseInt(hex.slice(2,4),16);
+  const b = parseInt(hex.slice(4,6),16);
+  return [r,g,b];
+}
+function luminance(hex) {
+  const [r,g,b] = hexToRgb(hex).map(v => v/255);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+function textColor(bgHex) {
+  return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
 }
 
-function getDia(ab) {
-    return {'lu':'LUN','ma':'MAR','mi':'MIE','ju':'JUE','vi':'VIE','sá':'SAB','do':'DOM'}[ab.toLowerCase().replace('.','')] || ab;
-}
+const workerSelect = document.getElementById('worker-select');
+const monthSelect = document.getElementById('month-select');
 
-function render() {
-  const selW = document.getElementById('worker-select').value;
-  const selM = document.getElementById('month-select').value;
+// Llenar selectores
+DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p;
+  opt.textContent = p;
+  workerSelect.appendChild(opt);
+});
+
+MONTHS_ORDER.forEach((m) => {
+  const opt = document.createElement('option');
+  opt.value = m;
+  opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+  monthSelect.appendChild(opt);
+});
+
+function renderAll() {
+  const selectedWorker = workerSelect.value;
+  const selectedMonth = monthSelect.value;
+  const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
+  const workers = selectedWorker === 'ALL' ? DATA.personas.filter(p => !p.includes('VACANTE')) : [selectedWorker];
+
   const main = document.getElementById('main-content');
   main.innerHTML = '';
 
-  const months = selM === 'ALL' ? MONTHS_ORDER : [selM];
-  
-  months.forEach(mName => {
-    const m = DATA.m[mName];
-    if (!m) return;
+  if (selectedWorker !== 'ALL') renderSummary(selectedWorker, months);
+  else document.getElementById('summary-bar').style.display = 'none';
 
-    const div = document.createElement('div');
-    div.className = 'month-section';
-    div.innerHTML = `<div class="month-header">${mName}<div style="flex:1;height:1px;background:var(--border)"></div></div>`;
+  months.forEach(monthName => {
+    const mdata = DATA.meses[monthName];
+    if (!mdata) return;
+
+    const section = document.createElement('div');
+    section.className = 'month-section';
+    section.innerHTML = `<div class="month-header"><span class="month-name">${monthName}</span><div class="month-line"></div></div>`;
 
     const table = document.createElement('table');
     table.className = 'cuadrante-table';
-    
-    // Header
-    let h = `<thead><tr><th class="worker-col">TRABAJADOR</th>`;
-    m.d.forEach(d => {
-      const isW = d.nm.includes('Sá') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
-      h += `<th class="${isW ? 'weekend-th' : ''}"><div>${d.n}</div><div style="font-size:7px">${getDia(d.nm)}</div></th>`;
-    });
-    table.innerHTML = h + `</tr></thead>`;
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `<th class="worker-col">Trabajador</th>`;
 
-    // Body
+    mdata.days.forEach(day => {
+      const th = document.createElement('th');
+      const esFindel = day.name.includes('Sá') || day.name.includes('Do');
+      const esFestivo = (FESTIVOS_2026[monthName] || []).includes(parseInt(day.num));
+
+      if (esFindel || esFestivo) th.className = 'weekend-th';
+      
+      // CAMBIO: Nombre del día completo
+      th.innerHTML = `<div>${day.num}</div><div style="font-size:8px; opacity:0.7">${getDiaCompleto(day.name)}</div>`;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
     const tbody = document.createElement('tbody');
-    m.w.forEach(wObj => {
-      if (selW !== 'ALL' && selW !== wObj.n) return;
+    workers.forEach(worker => {
+      const shifts = mdata.workers[worker];
+      if (!shifts) return;
+
       const tr = document.createElement('tr');
-      let row = `<td class="worker-name">${wObj.n}</td>`;
-      const shifts = wObj.s.split(',');
-      shifts.forEach((s, idx) => {
-        const d = m.d[idx];
-        const isW = d && (d.nm.includes('Sá') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n)));
-        let cell = s.trim();
-        let config = MAPEO_TURNOS[cell.toUpperCase()];
-        let content = config ? `<span class="cell-val" style="background:${config.bg};color:${config.color}">${config.texto}</span>` : cell;
-        row += `<td class="${isW ? 'weekend-td' : ''}">${content}</td>`;
+      tr.innerHTML = `<td class="worker-name">${worker}</td>`;
+
+      shifts.forEach((shift, i) => {
+        const td = document.createElement('td');
+        const day = mdata.days[i];
+        const esFindel = day.name.includes('Sá') || day.name.includes('Do');
+        const esFestivo = (FESTIVOS_2026[monthName] || []).includes(parseInt(day.num));
+
+        // CAMBIO: Pintar fondo si es finde o festivo
+        if (esFindel || esFestivo) td.className = 'weekend-td';
+
+        if (shift.val !== null && shift.val !== undefined && String(shift.val).trim() !== "") {
+          let valToDisplay = shift.val;
+          let valKey = String(shift.val).trim().toUpperCase();
+          let bgToDisplay = shift.color ? '#' + shift.color : '';
+          let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
+
+          if (MAPEO_TURNOS[valKey]) {
+            valToDisplay = MAPEO_TURNOS[valKey].texto;
+            bgToDisplay = MAPEO_TURNOS[valKey].bg;
+            colorToDisplay = MAPEO_TURNOS[valKey].color;
+          }
+
+          if (bgToDisplay) {
+            td.innerHTML = `<span class="cell-val" style="background-color:${bgToDisplay}; color:${colorToDisplay}">${valToDisplay}</span>`;
+          } else {
+            td.textContent = valToDisplay;
+            td.style.color = colorToDisplay;
+          }
+        }
+        tr.appendChild(td);
       });
-      tr.innerHTML = row;
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
-    div.appendChild(table);
-    main.appendChild(div);
+    section.appendChild(table);
+    main.appendChild(section);
   });
 }
+
+// ... resto de funciones (renderSummary) igual ...
+function renderSummary(worker, months) {
+  const bar = document.getElementById('summary-bar');
+  bar.style.display = 'flex';
+  const counts = {};
+  
+  months.forEach(monthName => {
+    const mdata = DATA.meses[monthName];
+    if (!mdata || !mdata.workers[worker]) return;
+    
+    mdata.workers[worker].forEach(shift => {
+      if (shift.val !== null && shift.val !== undefined && String(shift.val).trim() !== "") {
+        let valKey = String(shift.val).trim().toUpperCase();
+        let displayVal = shift.val;
+        let displayColor = shift.color ? '#' + shift.color : 'none';
+
+        if (MAPEO_TURNOS[valKey]) {
+          displayVal = MAPEO_TURNOS[valKey].texto;
+          displayColor = MAPEO_TURNOS[valKey].bg;
+        }
+
+        const key = displayVal + '|' + displayColor;
+        if (!counts[key]) counts[key] = { val: displayVal, color: displayColor, n: 0 };
+        counts[key].n++;
+      }
+    });
+  });
+
+  bar.innerHTML = `<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ${worker}:</span>`;
+
+  Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'summary-item';
+    const dotColor = item.color !== 'none' ? (item.color.startsWith('#') ? item.color : '#' + item.color) : '#7880a0';
+    div.innerHTML = `<div class="summary-dot" style="background:${dotColor}"></div><span class="summary-label">${item.val}</span><span class="summary-count">${item.n}</span>`;
+    bar.appendChild(div);
+  });
+}
+
+workerSelect.addEventListener('change', renderAll);
+monthSelect.addEventListener('change', renderAll);
+renderAll();
 </script>
 </body>
 </html>
