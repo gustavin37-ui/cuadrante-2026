@@ -96,11 +96,18 @@ const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','
 
 const MAPEO_TURNOS = {
   "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
+  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
   "3": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
   "4": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
   "5": { texto: "Guardia Bomberos Festivo", bg: "#F8CBAD", color: "#000" }, 
-  "FSM": { texto: "FSM", bg: "#FF0000", color: "#fff" },
-  "FSMF": { texto: "FSM FESTIVO", bg: "#FF0000", color: "#fff" },
+  "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
+  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
+  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
+  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
   "M7": { texto: "M7", bg: "#FFF2CC", color: "#000" }, 
   "M8": { texto: "M8", bg: "#FFE699", color: "#000" }, 
   "M9": { texto: "M9", bg: "#FFE699", color: "#000" }, 
@@ -112,7 +119,9 @@ const MAPEO_TURNOS = {
   "V": { texto: "V", bg: "#92D050", color: "#000" }, 
   "VC": { texto: "VC", bg: "#548235", color: "#fff" }, 
   "B": { texto: "BAJA", bg: "#595959", color: "#fff" },
+  "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" },
   "P": { texto: "PERMISO", bg: "#A6A6A6", color: "#000" }
+  
 };
 
 let DATA = null;
