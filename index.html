@@ -352,74 +352,38 @@ const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2
 // Variable global vacía que llenaremos con los datos de Google
 let DATA = null; 
 
-// ==========================================
-// CONFIGURACIÓN DE FESTIVOS 2026
-// Añade aquí los números de día que son festivos por mes
-// ==========================================
-const FESTIVOS_2026 = {
-    "ENERO": [1, 6],
-    "FEBRERO": [],
-    "MARZO": [19],
-    "ABRIL": [2, 3],
-    "MAYO": [1],
-    "JUNIO": [],
-    "JULIO": [],
-    "AGOSTO": [15],
-    "SEPTIEMBRE": [],
-    "OCTUBRE": [12],
-    "NOVIEMBRE": [1, 9],
-    "DICIEMBRE": [6, 8, 25]
-};
-
 const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-
-
-// Función para convertir "Lu." en "LUNES"
-function getDiaCompleto(abreviatura) {
-    const dia = abreviatura.toLowerCase().replace('.', '').trim();
-    const nombres = {
-        'lu': 'LUNES',
-        'ma': 'MARTES',
-        'mi': 'MIERCOLES',
-        'ju': 'JUEVES',
-        'vi': 'VIERNES',
-        'sá': 'SABADO',
-        'do': 'DOMINGO'
-    };
-    return nombres[dia] || abreviatura.toUpperCase();
-}
-
 
 // =======================================================================
 // 2. EL DICCIONARIO MÁGICO
 // =======================================================================
 const MAPEO_TURNOS = {
-  "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
-  "3": { texto: "GUARDIA BOMBEROS",   bg: "#F8CBAD", color: "#000000" }, 
-  "4": { texto: "GUARDIA BOMBEROS",  bg: "#F8CBAD", color: "#000000" }, 
-  "5": { texto: "GUARDIA BOMBEROS FESTIVO", bg: "#F8CBAD", color: "#000000" }, 
+  "1": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
+  "3": { texto: "G",   bg: "#F8CBAD", color: "#000000" }, 
+  "4": { texto: "GF",  bg: "#F8CBAD", color: "#000000" }, 
+  "5": { texto: "GFF", bg: "#F8CBAD", color: "#000000" }, 
   "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
-  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSMF",    bg: "#FF0000", color: "#FFFFFF" },
   "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
-  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112F", bg: "#FF0000", color: "#FFFFFF" },
   "M7": { texto: "M7", bg: "#FFF2CC", color: "#000000" }, 
   "M8": { texto: "M8", bg: "#FFE699", color: "#000000" }, 
   "M9": { texto: "M9", bg: "#FFE699", color: "#000000" }, 
   "TT": { texto: "TT", bg: "#FFC000", color: "#000000" }, 
   "L":   { texto: "L",   bg: "#00B0F0", color: "#FFFFFF" }, 
-  "G":   { texto: "GUARDIA JUSTICIA",   bg: "#B4C6E7", color: "#000000" }, 
-  "GF":  { texto: "GUARDIA JSUTICIA",  bg: "#B4C6E7", color: "#000000" }, 
-  "GFF": { texto: "GUARDIA JUSTICIA FESTIVO", bg: "#B4C6E7", color: "#000000" }, 
+  "G":   { texto: "G",   bg: "#B4C6E7", color: "#000000" }, 
+  "GF":  { texto: "GF",  bg: "#B4C6E7", color: "#000000" }, 
+  "GFF": { texto: "GFF", bg: "#B4C6E7", color: "#000000" }, 
   "V":   { texto: "V",   bg: "#92D050", color: "#000000" }, 
   "VC":  { texto: "VC",  bg: "#548235", color: "#FFFFFF" }, 
-  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
-  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
-  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
-  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
-  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
+  "LOC": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
+  "112M":    { texto: "112M",    bg: "#D9D9D9", color: "#000000" }, 
+  "112T":    { texto: "112T",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC112M", bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112T": { texto: "LOC112T", bg: "#D9D9D9", color: "#000000" }, 
   "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" }, 
-  "P":       { texto: "PERMISO",       bg: "#A6A6A6", color: "#000000" }, 
-  "B":       { texto: "BAJA",       bg: "#595959", color: "#FFFFFF" } 
+  "P":       { texto: "P",       bg: "#A6A6A6", color: "#000000" }, 
+  "B":       { texto: "B",       bg: "#595959", color: "#FFFFFF" } 
 };
 
 // =======================================================================
