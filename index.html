@@ -325,192 +325,203 @@
 
 <div class="legend">
   <span class="legend-title">Leyenda:</span>
-  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> L (Libre)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> FSM / FSMF / FSM112</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#70AD47"></div> VC / LOC / Guardia</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> G / GF / GFF</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#44546A"></div> 112M / 112T / LOC112</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#F2B800"></div> TT</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> V</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFC000"></div> TURNOS M7/M8/M9/TT</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00B0F0"></div> Libranza Guardias</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div> Guardias FSM</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5B9BD5"></div> Guardias Justicia</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F8CBAD"></div> Guardias Bomberos</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#44546A"></div> Localizados Bomberos</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ace887"></div> Localizados Justicia</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#92D050"></div> Vacaciones</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#548235"></div> Vacaciones año anterior / compensación</div>
   <div class="legend-item"><div class="legend-dot" style="background:rgba(255,120,50,0.3); border:1px solid rgba(255,120,50,0.5)"></div> Fin de semana</div>
 </div>
 
 <div id="summary-bar" class="summary-bar" style="display:none"></div>
 
 <main id="main-content">
-  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">
-    Cargando cuadrante desde la nube...<br>
-    <small style="opacity: 0.6; display: block; margin-top: 10px;">(Esto puede tardar unos segundos)</small>
-  </div>
+  <div id="loading" style="text-align:center;padding:60px;color:#7880a0;font-size:15px">Cargando cuadrante...</div>
 </main>
+
+<script src="datos.js"></script>
 
 <script>
 
-const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?output=csv";
-
-// Variable global vacía que llenaremos con los datos de Google
-let DATA = null; 
-
 const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
-// =======================================================================
-// 2. EL DICCIONARIO MÁGICO
-// =======================================================================
+// 🎯 EL DICCIONARIO MÁGICO: Traduce los números y fuerza colores perfectos
 const MAPEO_TURNOS = {
-  "1": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
-  "3": { texto: "G",   bg: "#F8CBAD", color: "#000000" }, 
-  "4": { texto: "GF",  bg: "#F8CBAD", color: "#000000" }, 
-  "5": { texto: "GFF", bg: "#F8CBAD", color: "#000000" }, 
+  "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
+  "3": { texto: "GUARDIA BOMBEROS",   bg: "#F8CBAD", color: "#000000" }, 
+  "4": { texto: "GUARDIA BOMBEROS",  bg: "#F8CBAD", color: "#000000" }, 
+  "5": { texto: "GUARDIA BOMBEROS FESTIVO", bg: "#F8CBAD", color: "#000000" }, 
   "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
-  "FSMF":    { texto: "FSMF",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
   "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
-  "FSM112F": { texto: "FSM112F", bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
   "M7": { texto: "M7", bg: "#FFF2CC", color: "#000000" }, 
   "M8": { texto: "M8", bg: "#FFE699", color: "#000000" }, 
   "M9": { texto: "M9", bg: "#FFE699", color: "#000000" }, 
   "TT": { texto: "TT", bg: "#FFC000", color: "#000000" }, 
   "L":   { texto: "L",   bg: "#00B0F0", color: "#FFFFFF" }, 
-  "G":   { texto: "G",   bg: "#B4C6E7", color: "#000000" }, 
-  "GF":  { texto: "GF",  bg: "#B4C6E7", color: "#000000" }, 
-  "GFF": { texto: "GFF", bg: "#B4C6E7", color: "#000000" }, 
+  "G":   { texto: "GUARDIA JUSTICIA",   bg: "#B4C6E7", color: "#000000" }, 
+  "GF":  { texto: "GUARDIA JSUTICIA",  bg: "#B4C6E7", color: "#000000" }, 
+  "GFF": { texto: "GUARDIA JUSTICIA FESTIVO", bg: "#B4C6E7", color: "#000000" }, 
   "V":   { texto: "V",   bg: "#92D050", color: "#000000" }, 
   "VC":  { texto: "VC",  bg: "#548235", color: "#FFFFFF" }, 
-  "LOC": { texto: "LOC", bg: "#E2EFDA", color: "#000000" }, 
-  "112M":    { texto: "112M",    bg: "#D9D9D9", color: "#000000" }, 
-  "112T":    { texto: "112T",    bg: "#D9D9D9", color: "#000000" }, 
-  "LOC112M": { texto: "LOC112M", bg: "#D9D9D9", color: "#000000" }, 
-  "LOC112T": { texto: "LOC112T", bg: "#D9D9D9", color: "#000000" }, 
+  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000000" }, 
+  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
+  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
+  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
   "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" }, 
-  "P":       { texto: "P",       bg: "#A6A6A6", color: "#000000" }, 
-  "B":       { texto: "B",       bg: "#595959", color: "#FFFFFF" } 
+  "P":       { texto: "PERMISO",       bg: "#A6A6A6", color: "#000000" }, 
+  "B":       { texto: "BAJA",       bg: "#595959", color: "#FFFFFF" } 
 };
 
-// =======================================================================
-// 3. OBTENER DATOS DE GOOGLE SHEETS
-// =======================================================================
-fetch(GOOGLE_CSV_URL)
-  .then(respuesta => respuesta.text())
-  .then(csvText => {
-      // Limpiamos el texto que viene de Google
-      let lineas = csvText.split('\n').filter(linea => linea.trim() !== '');
-      let ultimaLinea = lineas[lineas.length - 1];
-      
-      // NUEVO: Buscamos exactamente dónde empieza y acaba el JSON
-      // para ignorar la columna secreta "__PowerAppsId__"
-      let inicio = ultimaLinea.indexOf('{');
-      let fin = ultimaLinea.lastIndexOf('}');
-      
-      if (inicio === -1 || fin === -1) throw new Error("No hay JSON válido");
-      
-      // Recortamos solo la parte de los datos
-      let soloJson = ultimaLinea.substring(inicio, fin + 1);
-      
-      // Limpiamos las comillas extra de Google
-      let jsonLimpio = soloJson.replace(/""/g, '"');
-      
-      // Convertimos a datos
-      DATA = JSON.parse(jsonLimpio);
-      
-      // Arrancamos la aplicación
-      inicializarApp();
-  })
-  .catch(error => {
-      document.getElementById('loading').innerHTML = '<span style="color:#ff7832">Error leyendo el formato de los datos.</span>';
-      console.error("Error leyendo datos:", error);
-  });
-
-// =======================================================================
-// 4. LÓGICA DE LA APLICACIÓN (Adaptada para datos comprimidos)
-// =======================================================================
-function inicializarApp() {
-    const workerSelect = document.getElementById('worker-select');
-    const monthSelect = document.getElementById('month-select');
-
-    DATA.p.filter(p => !p.includes('VACANTE')).forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p; opt.textContent = p;
-      workerSelect.appendChild(opt);
-    });
-
-    MONTHS_ORDER.forEach((m) => {
-      const opt = document.createElement('option');
-      opt.value = m; opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
-      monthSelect.appendChild(opt);
-    });
-
-    workerSelect.addEventListener('change', renderAll);
-    monthSelect.addEventListener('change', renderAll);
-    renderAll();
+// Color helpers
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(0,2),16);
+  const g = parseInt(hex.slice(2,4),16);
+  const b = parseInt(hex.slice(4,6),16);
+  return [r,g,b];
+}
+function luminance(hex) {
+  const [r,g,b] = hexToRgb(hex).map(v => v/255);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+function textColor(bgHex) {
+  return luminance(bgHex) > 0.45 ? '#1a1d27' : '#ffffff';
 }
 
+// Populate selects
+const workerSelect = document.getElementById('worker-select');
+const monthSelect = document.getElementById('month-select');
+
+// Workers (exclude VACANTE)
+DATA.personas.filter(p => !p.includes('VACANTE')).forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p;
+  opt.textContent = p;
+  workerSelect.appendChild(opt);
+});
+
+MONTHS_ORDER.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = m;
+  opt.textContent = m.charAt(0) + m.slice(1).toLowerCase();
+  monthSelect.appendChild(opt);
+});
+
+// Render
 function renderAll() {
-  const selectedWorker = document.getElementById('worker-select').value;
-  const selectedMonth = document.getElementById('month-select').value;
+  const selectedWorker = workerSelect.value;
+  const selectedMonth = monthSelect.value;
+
   const months = selectedMonth === 'ALL' ? MONTHS_ORDER : [selectedMonth];
-  const workers = selectedWorker === 'ALL' ? DATA.p.filter(p => !p.includes('VACANTE')) : [selectedWorker];
+  const workers = selectedWorker === 'ALL'
+    ? DATA.personas.filter(p => !p.includes('VACANTE'))
+    : [selectedWorker];
+
   const main = document.getElementById('main-content');
   main.innerHTML = '';
 
-  if (selectedWorker !== 'ALL') renderSummary(selectedWorker, months);
-  else document.getElementById('summary-bar').style.display = 'none';
+  // Summary (only for single worker)
+  if (selectedWorker !== 'ALL') {
+    renderSummary(selectedWorker, months);
+  } else {
+    document.getElementById('summary-bar').style.display = 'none';
+  }
 
   months.forEach(monthName => {
-    const mdata = DATA.m[monthName];
+    const mdata = DATA.meses[monthName];
     if (!mdata) return;
 
     const section = document.createElement('div');
     section.className = 'month-section';
-    section.innerHTML = `<div class="month-header"><span class="month-name">${monthName}</span><div class="month-line"></div></div>`;
 
+    // Month header
+    const mh = document.createElement('div');
+    mh.className = 'month-header';
+    mh.innerHTML = `<span class="month-name">${monthName}</span><div class="month-line"></div>`;
+    section.appendChild(mh);
+
+    // Table
     const table = document.createElement('table');
     table.className = 'cuadrante-table';
+
+    // Header row
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `<th class="worker-col">Trabajador</th>`;
+    const thName = document.createElement('th');
+    thName.className = 'worker-col';
+    thName.textContent = 'Trabajador';
+    headerRow.appendChild(thName);
 
-    mdata.d.forEach(day => {
+    mdata.days.forEach(day => {
       const th = document.createElement('th');
-      const isWE = day.nm.includes('Sá') || day.nm.includes('Do') || day.nm.includes('Sa');
+      const isWE = day.name.includes('Sá') || day.name.includes('Do');
       if (isWE) th.className = 'weekend-th';
-      th.innerHTML = `<div>${day.n}</div><div style="font-size:9px;opacity:0.7">${day.nm}</div>`;
+      th.innerHTML = `<div>${day.num}</div><div style="font-size:9px;opacity:0.7">${day.name.replace('.','')}</div>`;
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
+    // Body rows
     const tbody = document.createElement('tbody');
     workers.forEach(worker => {
-      const shiftString = mdata.w[worker];
-      if (!shiftString && selectedWorker === 'ALL') return; // Salta si no tiene turnos
+      const shifts = mdata.workers[worker];
+      if (!shifts) return;
 
-      const shifts = shiftString ? shiftString.split(',') : new Array(mdata.d.length).fill("");
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="worker-name">${worker}</td>`;
+      const tdName = document.createElement('td');
+      tdName.className = 'worker-name';
+      tdName.textContent = worker;
+      tr.appendChild(tdName);
 
-      shifts.forEach((shiftVal, i) => {
+shifts.forEach((shift, i) => {
         const td = document.createElement('td');
-        const dayData = mdata.d[i];
-        const isWE = dayData && (dayData.nm.includes('Sá') || dayData.nm.includes('Do') || dayData.nm.includes('Sa'));
+        const isWE = mdata.days[i] && (mdata.days[i].name.includes('Sá') || mdata.days[i].name.includes('Do'));
         if (isWE) td.className = 'weekend-td';
 
-        if (shiftVal !== "") {
-          let valKey = shiftVal.trim().toUpperCase();
-          let config = MAPEO_TURNOS[valKey];
-          
-          if (config && config.bg) {
-            td.innerHTML = `<span class="cell-val" style="background-color:${config.bg}; color:${config.color}">${config.texto}</span>`;
+        if (shift.val !== null && shift.val !== undefined) {
+          // Valores por defecto
+          let valToDisplay = shift.val;
+          let valKey = String(shift.val).trim().toUpperCase();
+          let bgToDisplay = shift.color ? '#' + shift.color : '';
+          let colorToDisplay = shift.color ? textColor(shift.color) : '#a0a8c0';
+
+          // Traducir si existe en el diccionario
+          if (MAPEO_TURNOS[valKey]) {
+            valToDisplay = MAPEO_TURNOS[valKey].texto;
+            bgToDisplay = MAPEO_TURNOS[valKey].bg;
+            colorToDisplay = MAPEO_TURNOS[valKey].color;
+          }
+
+          if (bgToDisplay) {
+            const span = document.createElement('span');
+            span.className = 'cell-val';
+            span.style.backgroundColor = bgToDisplay;
+            span.style.color = colorToDisplay;
+            span.textContent = valToDisplay;
+            td.appendChild(span);
           } else {
-            td.textContent = shiftVal;
+            // Sin color (P, etc.)
+            td.textContent = valToDisplay;
+            td.style.color = colorToDisplay;
             td.style.fontWeight = '500';
           }
         } else if (isWE) {
           td.style.background = 'rgba(255,120,50,0.07)';
         }
+
         tr.appendChild(td);
       });
+
       tbody.appendChild(tr);
     });
+
     table.appendChild(tbody);
     section.appendChild(table);
     main.appendChild(section);
@@ -523,16 +534,20 @@ function renderSummary(worker, months) {
   const counts = {};
   
   months.forEach(monthName => {
-    const mdata = DATA.m[monthName];
-    if (!mdata || !mdata.w[worker]) return;
+    const mdata = DATA.meses[monthName];
+    if (!mdata || !mdata.workers[worker]) return;
     
-    const shifts = mdata.w[worker].split(',');
-    shifts.forEach(shiftVal => {
-      if (shiftVal !== "") {
-        let valKey = shiftVal.trim().toUpperCase();
-        let config = MAPEO_TURNOS[valKey];
-        let displayVal = config ? config.texto : shiftVal;
-        let displayColor = config ? config.bg : 'none';
+    mdata.workers[worker].forEach(shift => {
+      if (shift.val !== null && shift.val !== undefined) {
+        let valKey = String(shift.val).trim().toUpperCase();
+        let displayVal = shift.val;
+        let displayColor = shift.color ? '#' + shift.color : 'none';
+
+        // Traducimos también para el resumen
+        if (MAPEO_TURNOS[valKey]) {
+          displayVal = MAPEO_TURNOS[valKey].texto;
+          displayColor = MAPEO_TURNOS[valKey].bg;
+        }
 
         const key = displayVal + '|' + displayColor;
         if (!counts[key]) counts[key] = { val: displayVal, color: displayColor, n: 0 };
@@ -541,16 +556,41 @@ function renderSummary(worker, months) {
     });
   });
 
-  bar.innerHTML = `<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ${worker}:</span>`;
+  bar.innerHTML = '<span class="summary-title" style="font-size:12px;font-weight:600;color:#7880a0;margin-right:4px">Resumen ' + worker + ':</span>';
 
   Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
     const div = document.createElement('div');
     div.className = 'summary-item';
-    const bgStyle = item.color !== 'none' ? `background:${item.color}` : `background:#7880a0`;
-    div.innerHTML = `<div class="summary-dot" style="${bgStyle}"></div><span class="summary-label">${item.val}</span><span class="summary-count">${item.n}</span>`;
+    
+    const dot = document.createElement('div');
+    dot.className = 'summary-dot';
+    if (item.color !== 'none') {
+        // Asegurarnos de que coge el HEX correcto
+        dot.style.background = item.color.startsWith('#') ? item.color : '#' + item.color;
+    } else {
+        dot.style.background = '#7880a0';
+    }
+    
+    const label = document.createElement('span');
+    label.className = 'summary-label';
+    label.textContent = item.val;
+    
+    const count = document.createElement('span');
+    count.className = 'summary-count';
+    count.textContent = item.n;
+    
+    div.appendChild(dot);
+    div.appendChild(label);
+    div.appendChild(count);
     bar.appendChild(div);
   });
 }
+
+workerSelect.addEventListener('change', renderAll);
+monthSelect.addEventListener('change', renderAll);
+
+// Initial render
+renderAll();
 </script>
 </body>
 </html>
