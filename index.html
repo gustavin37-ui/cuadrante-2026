@@ -1,886 +1,262 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Dashboard 2026 · Citas, Guardias &amp; Técnicos</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadrante 2026</title>
 <style>
-:root{--bg:#0c0f1a;--surface:#131726;--card:#1a1f35;--border:#252c45;--accent1:#4f9cf9;--accent2:#f97c4f;--accent3:#4ff9b8;--accent4:#c94ff9;--text:#e8eaf2;--muted:#a5aed4;--grid:rgba(255,255,255,0.03);}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-.wrapper{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 24px;}
-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:20px;}
-.header-left h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;background:linear-gradient(135deg,var(--accent1),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.header-left p{color:var(--muted);font-size:0.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:6px;}
-.header-right{display:flex;gap:24px;flex-wrap:wrap;}
-.stat-pill{text-align:right;}.stat-pill .num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--accent1);display:block;line-height:1;}.stat-pill .lbl{font-size:.7rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s;animation:fadeUp .6s ease both;}
-.kpi-card:hover{transform:translateY(-3px);border-color:var(--accent1);}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.kpi-card:nth-child(1)::before{background:var(--accent1);}.kpi-card:nth-child(2)::before{background:var(--accent2);}.kpi-card:nth-child(3)::before{background:var(--accent3);}.kpi-card:nth-child(4)::before{background:var(--accent4);}
-.kpi-label{font-size:.68rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
-.kpi-value{font-family:'DM Serif Display',serif;font-size:2.2rem;line-height:1;}
-.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:6px;}
-.kpi-card:nth-child(1) .kpi-value{color:var(--accent1);}.kpi-card:nth-child(2) .kpi-value{color:var(--accent2);}.kpi-card:nth-child(3) .kpi-value{color:var(--accent3);}.kpi-card:nth-child(4) .kpi-value{color:var(--accent4);}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
-.g3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:20px;margin-bottom:20px;}
-.gg{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;margin-bottom:20px;}
-.g3e{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px;}
-.cc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;animation:fadeUp .6s ease both;transition:border-color .3s;}
-.cc:hover{border-color:rgba(79,156,249,.3);}.cc.full{grid-column:1/-1;}
-.ct{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--text);margin-bottom:4px;}
-.cs{font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px;}
-.cw{position:relative;}.cw canvas{width:100%!important;}
-.top-t{width:100%;border-collapse:collapse;font-size:.8rem;}
-.top-t th{color:var(--muted);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
-.top-t td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
-.top-t tr:last-child td{border-bottom:none;}.top-t tr:hover td{background:rgba(79,156,249,.05);}
-.rank{color:var(--muted);font-size:.7rem;}
-.bm{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;width:100%;}.bmf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent1),var(--accent3));}
-.hmw{overflow-x:auto;}
-.hm{display:grid;grid-template-columns:36px repeat(12,1fr);gap:3px;min-width:600px;}
-.hml{font-size:.62rem;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;}
-.hmh{font-size:.62rem;color:var(--muted);text-align:center;padding-bottom:4px;}
-.hmc{height:28px;border-radius:4px;transition:transform .15s;cursor:default;}
-.hmc:hover{transform:scale(1.15);z-index:10;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}.g2,.g3,.gg,.g3e{grid-template-columns:1fr;}}
-.lr{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;}.li{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted);}.ld{width:8px;height:8px;border-radius:50%;}
-.sl{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}.sl::after{content:'';flex:1;height:1px;background:var(--border);}
-.tnav{display:flex;gap:4px;margin-bottom:40px;border-bottom:1px solid var(--border);}
-.tbtn{background:none;border:none;cursor:pointer;padding:10px 24px;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;white-space:nowrap;}
-.tbtn:hover{color:var(--text);}.tbtn.active{color:var(--accent1);border-bottom-color:var(--accent1);}
-.tc{display:none;}.tc.active{display:block;}
-.sb{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
-.sb-fsm{background:rgba(79,156,249,.15);color:#4f9cf9;border:1px solid rgba(79,156,249,.3);}
-.sb-gd{background:rgba(249,124,79,.15);color:#f97c4f;border:1px solid rgba(249,124,79,.3);}
-.sb-f12{background:rgba(79,249,184,.15);color:#4ff9b8;border:1px solid rgba(79,249,184,.3);}
-.sb-g12{background:rgba(201,79,249,.15);color:#c94ff9;border:1px solid rgba(201,79,249,.3);}
-.at{width:100%;border-collapse:collapse;font-size:.78rem;}
-.at th{color:var(--muted);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
-.at td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
-.at tr:last-child td{border-bottom:none;}.at tr:hover td{background:rgba(79,156,249,.04);}
-.tbl-expand{cursor:pointer;}
-.tbl-expand::after{content:'⛶';position:absolute;top:14px;right:16px;font-size:.9rem;color:var(--muted);opacity:.5;transition:opacity .2s;}
-.tbl-expand:hover::after{opacity:1;color:var(--accent1);}
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
-/* Modales */
-#tbl-modal, #tech-modal {display:none;position:fixed;inset:0;z-index:9999;background:rgba(8,10,20,.92);backdrop-filter:blur(6px);animation:fadeIn .2s ease;}
-#tbl-modal.open, #tech-modal.open {display:flex;flex-direction:column;justify-content:center;align-items:center;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-#tbl-modal-inner, #tech-modal-inner {margin:auto;width:96vw;max-height:90vh;background:var(--card);border:1px solid var(--border);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6);}
-#tech-modal-inner { max-width: 900px; width:90vw; }
-#tbl-modal-head, #tech-modal-head {display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid var(--border);flex-shrink:0;gap:16px;}
-#tbl-modal-title, #tech-modal-title {font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);}
-#tbl-modal-sub, #tech-modal-sub {font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:4px;}
-#tbl-modal-close, #tech-modal-close {background:rgba(249,124,79,.15);border:1px solid rgba(249,124,79,.3);color:var(--accent2);border-radius:8px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;flex-shrink:0;transition:background .2s;}
-#tbl-modal-close:hover, #tech-modal-close:hover {background:rgba(249,124,79,.3);}
-#tech-modal-download {background:rgba(79,249,184,.15);border:1px solid rgba(79,249,184,.3);color:var(--accent3);border-radius:8px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;flex-shrink:0;transition:background .2s;}
-#tech-modal-download:hover {background:rgba(79,249,184,.3);}
-#tbl-modal-body, #tech-modal-body {overflow:auto;padding:24px 28px;flex:1;min-height:0;}
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf2;
+    --text-muted: #7880a0;
+    --accent: #4e82ee;
+    --weekend-bg: rgba(255,120,50,0.15);
+    --weekend-text: #ff7832;
+  }
 
-.nc{text-align:right;font-variant-numeric:tabular-nums;}.nh{color:var(--accent1);font-weight:500;}.nw{color:var(--accent2);}.no{color:var(--accent3);}
-.footer-nota{text-align:center;margin-top:40px;padding-top:20px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--muted);letter-spacing:.05em;}
-/* Scrollbars personalizadas para las tablas horizaontales */
-.scroller::-webkit-scrollbar { width: 8px; height: 8px; }
-.scroller::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 4px; }
-.scroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-.scroller::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-/* Estilos para los Radio Buttons / Filtros */
-.radios{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
-.radios label{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted);cursor:pointer;transition:color .2s;text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
-.radios label:hover{color:var(--text);}
-.radios input[type="radio"]{accent-color:var(--accent1);cursor:pointer;margin:0;width:14px;height:14px;}
+  header { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .controls { display: flex; align-items: center; gap: 12px; flex: 1; }
+  select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 14px; min-width: 200px; outline: none; }
 
-/* Estilo hover para filas de técnicos */
-.tech-row { cursor: pointer; transition: background 0.2s; }
-.tech-row:hover td { background: rgba(79,156,249,.1) !important; }
+  .legend { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; align-items: center; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
+
+  main { padding: 20px 24px; overflow-x: auto; }
+  .month-section { margin-bottom: 40px; }
+  .month-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; text-transform: uppercase; font-weight: 700; color: var(--accent); font-size: 14px; }
+
+  .cuadrante-table { border-collapse: collapse; width: 100%; min-width: 1000px; font-family: 'DM Mono', monospace; font-size: 11px; }
+  .cuadrante-table th, .cuadrante-table td { border: 1px solid var(--border); text-align: center; vertical-align: middle; height: 40px; padding: 2px; }
+  
+  .cuadrante-table th { background: var(--surface2); color: var(--text-muted); font-size: 10px; }
+  .cuadrante-table th.worker-col { text-align: left; padding: 0 12px; width: 160px; background: var(--surface); position: sticky; left: 0; z-index: 3; }
+  .cuadrante-table th.weekend-th { color: var(--weekend-text); background: rgba(255,120,50,0.05); }
+
+  .cuadrante-table td.worker-name { text-align: left; padding: 0 12px; font-family: 'DM Sans'; font-weight: 600; background: var(--surface); position: sticky; left: 0; z-index: 2; white-space: nowrap; }
+  .cuadrante-table td.weekend-td { background: var(--weekend-bg) !important; }
+
+  .summary-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 24px; background: var(--surface2); border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .summary-item { display: flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 11px; }
+  .summary-dot { width: 8px; height: 8px; border-radius: 50%; }
 </style>
 </head>
 <body>
-<div class="wrapper">
+
 <header>
-  <div class="header-left">
-    <h1>Dashboard 2026</h1>
-    <p>Citas · Guardias · Técnicos · Análisis anual</p>
-  </div>
-  <div class="header-right">
-    <div class="stat-pill"><span class="num">2.477</span><span class="lbl">Total citas</span></div>
-    <div class="stat-pill"><span class="num">931</span><span class="lbl">Llamadas guardias</span></div>
-    <div class="stat-pill"><span class="num">11.355</span><span class="lbl">Comunicaciones totales</span></div>
+  <div class="logo">Cuadrante <span>2026</span></div>
+  <div class="controls">
+    <select id="worker-select"><option value="ALL">— Todos los trabajadores —</option></select>
+    <select id="month-select"><option value="ALL">— Todos los meses —</option></select>
   </div>
 </header>
-<div class="tnav">
-  <button class="tbtn active" onclick="switchTab('citas',this)">📅 Citas 2026</button>
-  <button class="tbtn" onclick="switchTab('guardias',this)">📞 Guardias 2026</button>
-  <button class="tbtn" onclick="switchTab('tecnicos',this)">🛠️ Técnicos 2026</button>
-</div>
 
-<div id="tc-citas" class="tc active">
-  <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">Mes pico</div><div class="kpi-value">Marzo</div><div class="kpi-sub">866 citas · máximo del año</div></div>
-    <div class="kpi-card"><div class="kpi-label">Mes valle</div><div class="kpi-value">Enero</div><div class="kpi-sub">752 citas · mínimo del año</div></div>
-    <div class="kpi-card"><div class="kpi-label">Hora estrella</div><div class="kpi-value">9h</div><div class="kpi-sub">566 citas · 22.9% del total</div></div>
-    <div class="kpi-card"><div class="kpi-label">Día más activo</div><div class="kpi-value">Jueves</div><div class="kpi-sub">Mayor volumen semanal</div></div>
-  </div>
-  <div class="sl">Distribución temporal</div>
-  <div class="g2">
-    <div class="cc" style="animation-delay:.25s"><div class="ct">Citas por mes</div><div class="cs">Total mensual · Media por día laborable</div><div class="cw"><canvas id="cMes" height="220"></canvas></div></div>
-    <div class="cc" style="animation-delay:.3s"><div class="ct">Citas por día de semana</div><div class="cs">Distribución semanal</div><div class="cw"><canvas id="cDS" height="220"></canvas></div></div>
-  </div>
-  <div class="sl">Análisis horario</div>
-  <div class="g3">
-    <div class="cc" style="animation-delay:.35s"><div class="ct">Citas por franja horaria</div><div class="cs">Hora a hora</div><div class="cw"><canvas id="cH" height="240"></canvas></div></div>
-    <div class="cc" style="animation-delay:.4s"><div class="ct">Mañana vs Tarde</div><div class="cs">Proporción por turno</div><div class="cw"><canvas id="cT" height="240"></canvas></div><div class="lr" id="lrT"></div></div>
-    <div class="cc" style="animation-delay:.45s"><div class="ct">Top 8 días</div><div class="cs">Días con más actividad</div><table class="top-t" id="topDias"></table></div>
-  </div>
-  <div class="sl">Mapa de calor mensual</div>
-  <div class="cc full" style="animation-delay:.5s;margin-bottom:20px;">
-    <div class="ct">Intensidad por hora y mes</div><div class="cs">Citas por cruce hora × mes</div>
-    <div class="hmw"><div class="hm" id="hmGrid"></div></div>
-    <div class="lr" style="margin-top:16px;justify-content:flex-end;align-items:center;gap:6px;">
-      <span style="font-size:.65rem;color:var(--muted)">Menos</span>
-      <div id="hmLeg" style="display:flex;gap:3px;"></div>
-      <span style="font-size:.65rem;color:var(--muted)">Más</span>
-    </div>
+<div class="legend">
+  <span style="color:var(--text-muted)">LEYENDA:</span>
+  <div style="display:flex; gap:15px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#FFC000"></div> M7/M8/M9/TT</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#00B0F0"></div> Libranza</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#FF0000"></div> FSM</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#B4C6E7"></div> G. Justicia</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#F8CBAD"></div> G. Bomberos</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:#ace887"></div> Localizados</div>
+    <div style="display:flex; align-items:center; gap:6px"><div class="legend-dot" style="background:var(--weekend-text)"></div> Festivo / Finde</div>
   </div>
 </div>
 
-<div id="tc-guardias" class="tc">
-  <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">Total llamadas atendidas</div><div class="kpi-value">931</div><div class="kpi-sub">Suma todos los servicios</div></div>
-    <div class="kpi-card"><div class="kpi-label">Perturbaciones / Rechazos</div><div class="kpi-value">49</div><div class="kpi-sub">5.3% sobre atendidas</div></div>
-    <div class="kpi-card"><div class="kpi-label">Salientes realizadas</div><div class="kpi-value">88</div><div class="kpi-sub">Llamadas salientes totales</div></div>
-    <div class="kpi-card"><div class="kpi-label">Servicio más activo</div><div class="kpi-value">FSM</div><div class="kpi-sub">393 atendidas · 42.2%</div></div>
+<main>
+  <div id="summary-bar" class="summary-bar" style="display:none"></div>
+  <div id="main-content">
+    <div id="loading" style="text-align:center;padding:100px;color:var(--text-muted)">Conectando con el servidor de datos...</div>
   </div>
-  <div class="sl">Métricas por servicio</div>
-  <div class="g3e">
-    <div class="cc" style="animation-delay:.2s"><div class="ct">Atendidas totales</div><div class="cs">Por servicio · año completo</div><div class="cw"><canvas id="gAt" height="220"></canvas></div></div>
-    <div class="cc" style="animation-delay:.25s"><div class="ct">Perturbaciones</div><div class="cs">Por servicio · año completo</div><div class="cw"><canvas id="gPe" height="220"></canvas></div></div>
-    <div class="cc" style="animation-delay:.3s"><div class="ct">Salientes</div><div class="cs">Por servicio · año completo</div><div class="cw"><canvas id="gSa" height="220"></canvas></div></div>
-  </div>
-  <div class="sl">Ranking agentes</div>
-  <div class="g2">
-    <div class="cc" style="animation-delay:.4s"><div class="ct">Agentes · <span class="sb sb-fsm">FSM</span></div><div class="cs">Por atendidas</div><table class="at" id="gtFSM"></table></div>
-    <div class="cc" style="animation-delay:.45s"><div class="ct">Agentes · <span class="sb sb-gd">GUARDIA</span></div><div class="cs">Por atendidas</div><table class="at" id="gtGUA"></table></div>
-  </div>
-  <div class="g2" style="margin-bottom:20px;">
-    <div class="cc" style="animation-delay:.5s"><div class="ct">Agentes · <span class="sb sb-f12">FSM 112</span></div><div class="cs">Por atendidas</div><table class="at" id="gtF12"></table></div>
-    <div class="cc" style="animation-delay:.55s"><div class="ct">Agentes · <span class="sb sb-g12">GUARDIA 112</span></div><div class="cs">Por atendidas</div><table class="at" id="gtG12"></table></div>
-  </div>
-  <div class="sl">Total Guardias · Pestaña TOTAL</div>
-  <div class="kpi-row" style="margin-bottom:20px;">
-    <div class="kpi-card"><div class="kpi-label">FSM</div><div class="kpi-value" id="gtotFSM" style="color:var(--accent1)">—</div><div class="kpi-sub">Llamadas entrantes anuales</div></div>
-    <div class="kpi-card"><div class="kpi-label">FSM 112</div><div class="kpi-value" id="gtotFSM112" style="color:var(--accent3)">—</div><div class="kpi-sub">Llamadas entrantes anuales</div></div>
-    <div class="kpi-card"><div class="kpi-label">Guardia</div><div class="kpi-value" id="gtotGUARDIA" style="color:var(--accent2)">—</div><div class="kpi-sub">Llamadas entrantes anuales</div></div>
-    <div class="kpi-card"><div class="kpi-label">Guardia 112</div><div class="kpi-value" id="gtotGUARDIA112" style="color:var(--accent4)">—</div><div class="kpi-sub">Llamadas entrantes anuales</div></div>
-  </div>
-  <div class="cc full" style="animation-delay:.6s;margin-bottom:20px;">
-    <div class="ct">Desglose mensual · Total Guardias</div>
-    <div class="cs">Llamadas entrantes por servicio y mes</div>
-    <div class="cw"><canvas id="gTotalMes" height="260"></canvas></div>
-  </div>
-</div>
-
-<div id="tc-tecnicos" class="tc">
-  <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">Comunicaciones totales</div><div class="kpi-value">11.355</div><div class="kpi-sub">31 técnicos</div></div>
-    <div class="kpi-card"><div class="kpi-label">Llamadas atendidas</div><div class="kpi-value">5.692</div><div class="kpi-sub">50.1% del total</div></div>
-    <div class="kpi-card"><div class="kpi-label">Salientes realizadas</div><div class="kpi-value">5.663</div><div class="kpi-sub">49.9% del total</div></div>
-    <div class="kpi-card"><div class="kpi-label">Perturbaciones</div><div class="kpi-value">973</div><div class="kpi-sub">17.1% sobre atendidas</div></div>
-  </div>
-  
-  <div class="sl">Resumen completo</div>
-  <div class="cc full" style="animation-delay:.1s;margin-bottom:20px;">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
-      <div><div class="ct">Tabla de métricas</div><div class="cs">Selecciona columnas a mostrar (Clic en técnico para resumen)</div></div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="position:relative;">
-          <div id="tCB" onclick="toggleTCol()" style="cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-family:'DM Mono',monospace;font-size:.75rem;color:var(--text);user-select:none;white-space:nowrap;">
-            <span>📊</span><span id="tCL">Todas las columnas</span>
-            <span id="tCC" style="background:var(--accent1);color:#0c0f1a;border-radius:10px;padding:1px 7px;font-size:.65rem;display:none;"></span>
-            <span style="color:var(--muted);margin-left:4px;">▾</span>
-          </div>
-          <div id="tCP" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:100;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;min-width:260px;box-shadow:0 8px 32px rgba(0,0,0,.4);">
-            <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Columnas visibles</div>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <button onclick="selAllCols(true)" style="flex:1;background:rgba(79,156,249,.15);border:1px solid rgba(79,156,249,.3);color:var(--accent1);border-radius:6px;padding:4px 8px;font-family:'DM Mono',monospace;font-size:.65rem;cursor:pointer;">Todas</button>
-              <button onclick="selAllCols(false)" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;font-family:'DM Mono',monospace;font-size:.65rem;cursor:pointer;">Ninguna</button>
-            </div>
-            <div id="tCO" style="display:flex;flex-direction:column;gap:3px;"></div>
-          </div>
-        </div>
-        <button onclick="resetCols()" id="tCR" style="display:none;background:rgba(249,124,79,.15);border:1px solid rgba(249,124,79,.3);color:var(--accent2);border-radius:8px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:.72rem;cursor:pointer;">✕ Resetear</button>
-      </div>
-    </div>
-    <div class="scroller" style="overflow-x:auto;"><table class="at" id="tTbl" style="min-width:300px;"></table></div>
-  </div>
-
-  <div class="sl">Actividad</div>
-  
-  <div class="cc full" style="animation-delay:.2s;margin-bottom:20px;">
-    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-        <div><div class="ct">Comunicaciones totales</div><div class="cs" style="margin-bottom:0">Atendidas + Salientes</div></div>
-        <div class="radios" onclick="event.stopPropagation()">
-            <label><input type="radio" name="rk_filt" value="all" checked onchange="filtRk(this.value)"> Todas</label>
-            <label><input type="radio" name="rk_filt" value="at" onchange="filtRk(this.value)"> Atendidas</label>
-            <label><input type="radio" name="rk_filt" value="sal" onchange="filtRk(this.value)"> Salientes</label>
-        </div>
-    </div>
-    <div class="cw scroller" style="overflow-y:auto; max-height:550px; padding-right:10px;"><div style="height:1200px; position:relative;"><canvas id="tRk"></canvas></div></div>
-  </div>
-  
-  <div class="cc full" style="animation-delay:.25s;margin-bottom:20px;">
-    <div class="ct">Perturbaciones / Rechazos</div><div class="cs">🟢 &lt;100 · 🟡 100–199 · 🔴 ≥200</div>
-    <div class="cw scroller" style="overflow-y:auto; max-height:550px; padding-right:10px;"><div style="height:1200px; position:relative;"><canvas id="tPe"></canvas></div></div>
-  </div>
-  
-  <div class="cc full" style="animation-delay:.3s;margin-bottom:20px;">
-    <div class="ct">Conexión Web vs Móvil</div><div class="cs">Tipo de acceso</div>
-    <div class="cw scroller" style="overflow-y:auto; max-height:550px; padding-right:10px;"><div style="height:1200px; position:relative;"><canvas id="tCx"></canvas></div></div>
-  </div>
-  
-  <div class="sl">Seguimiento y citas</div>
-  
-  <div class="cc full" style="animation-delay:.35s;margin-bottom:20px;">
-    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-        <div><div class="ct">No-Reply · Faros · Correos</div><div class="cs" style="margin-bottom:0">Seguimiento por técnico</div></div>
-        <div class="radios" onclick="event.stopPropagation()">
-            <label><input type="radio" name="sg_filt" value="all" checked onchange="filtSg(this.value)"> Todas</label>
-            <label><input type="radio" name="sg_filt" value="nor" onchange="filtSg(this.value)"> No-Reply</label>
-            <label><input type="radio" name="sg_filt" value="far" onchange="filtSg(this.value)"> Faros</label>
-            <label><input type="radio" name="sg_filt" value="cor" onchange="filtSg(this.value)"> Correos</label>
-        </div>
-    </div>
-    <div class="cw scroller" style="overflow-y:auto; max-height:550px; padding-right:10px;"><div style="height:1200px; position:relative;"><canvas id="tSg"></canvas></div></div>
-  </div>
-  
-  <div class="cc full" style="animation-delay:.4s;margin-bottom:20px;">
-    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
-        <div><div class="ct">Citas Remotas vs Presenciales</div><div class="cs" style="margin-bottom:0">Por técnico</div></div>
-        <div class="radios" onclick="event.stopPropagation()">
-            <label><input type="radio" name="ci_filt" value="all" checked onchange="filtCi(this.value)"> Todas</label>
-            <label><input type="radio" name="ci_filt" value="crem" onchange="filtCi(this.value)"> Remotas</label>
-            <label><input type="radio" name="ci_filt" value="cpre" onchange="filtCi(this.value)"> Presenciales</label>
-        </div>
-    </div>
-    <div class="cw scroller" style="overflow-y:auto; max-height:550px; padding-right:10px;"><div style="height:1200px; position:relative;"><canvas id="tCi"></canvas></div></div>
-  </div>
-</div>
-
-<div class="footer-nota">
-  ℹ️ <strong>Nota aclaratoria:</strong> Los valores aquí representados reflejan aproximadamente entre un 90% y un 95% de la actividad operativa real, debido a la complejidad y anomalías técnicas en la extracción de ciertos registros de origen.
-</div>
-</div> 
-
-<div id="tbl-modal">
-  <div id="tbl-modal-inner">
-    <div id="tbl-modal-head">
-      <div><div id="tbl-modal-title"></div><div id="tbl-modal-sub"></div></div>
-      <button id="tbl-modal-close" onclick="closeTblModal()">✕ Cerrar</button>
-    </div>
-    <div id="tbl-modal-body" class="scroller"></div>
-  </div>
-</div>
-
-<div id="tech-modal">
-  <div id="tech-modal-inner">
-    <div id="tech-modal-head">
-      <div><div id="tech-modal-title"></div><div id="tech-modal-sub">Análisis personal y comparativa respecto a la media total</div></div>
-      <div style="display:flex; gap:12px; flex-shrink:0;">
-        <button id="tech-modal-download">📥 Descargar CSV</button>
-        <button id="tech-modal-close" onclick="closeTechModal()">✕ Cerrar</button>
-      </div>
-    </div>
-    <div id="tech-modal-body" class="scroller"></div>
-  </div>
-</div>
+</main>
 
 <script>
-// ── DATOS ──────────────────────────────────────────────────────
-const DATA = {"meses": {"labels": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"], "values": [752, 859, 866, 0, 0, 0, 0, 0, 0, 0, 0, 0], "diasLab": [20, 20, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1]}, "diasSemana": {"labels": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"], "values": [513, 523, 504, 525, 410, 2, 0]}, "horas": {"labels": ["7h", "8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h"], "values": [10, 142, 566, 493, 425, 358, 248, 118, 34, 33, 26, 16, 3, 2, 0]}, "topDias": [{"fecha": "13 Ene", "citas": 58}, {"fecha": "27 Ene", "citas": 57}, {"fecha": "23 Feb", "citas": 53}, {"fecha": "25 Feb", "citas": 52}, {"fecha": "18 Feb", "citas": 51}, {"fecha": "26 Feb", "citas": 50}, {"fecha": "17 Feb", "citas": 49}, {"fecha": "19 Ene", "citas": 49}], "heatmap": {"horas": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], "data": [[1, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [34, 43, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0], [174, 189, 203, 0, 0, 0, 0, 0, 0, 0, 0, 0], [152, 169, 172, 0, 0, 0, 0, 0, 0, 0, 0, 0], [132, 150, 143, 0, 0, 0, 0, 0, 0, 0, 0, 0], [113, 141, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0], [72, 87, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0], [38, 36, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0], [12, 11, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0], [10, 9, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0], [6, 9, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0], [2, 11, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0], [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]}};
-    DATA.meses.medias = DATA.meses.values.map((v,i) => parseFloat((v/DATA.meses.diasLab[i]).toFixed(1)));
-    
-const GD = {"FSM": {"monthly": {"ENERO": {"PERTURBACION": 14, "ATENDIDAS": 167, "SALIENTES": 20}, "FEBRERO": {"PERTURBACION": 6, "ATENDIDAS": 113, "SALIENTES": 17}, "MARZO": {"PERTURBACION": 3, "ATENDIDAS": 113, "SALIENTES": 20}, "ABRIL": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MAYO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JUNIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JULIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "AGOSTO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "SEPTIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "OCTUBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "NOVIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "DICIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}}, "agents": [{"n": "RODRIGUEZ AREVALO ALBERTO", "at": 17, "pe": 0, "sa": 0}, {"n": "DUQUE VELASQUEZ CÉSAR", "at": 54, "pe": 2, "sa": 8}, {"n": "IZQUIERDO OLIVA EDUARDO", "at": 56, "pe": 0, "sa": 10}, {"n": "FERNANDEZ AGUADO FERNANDO", "at": 36, "pe": 4, "sa": 4}, {"n": "VELASCO DE LA CRUZ JUAN ANTONIO", "at": 43, "pe": 9, "sa": 6}, {"n": "VIVAS LINARES MIGUEL", "at": 45, "pe": 2, "sa": 5}, {"n": "HERRERA PEREZ RAUL", "at": 55, "pe": 0, "sa": 8}, {"n": "CÉSAR BUSTAMANTE GUSTAVO", "at": 32, "pe": 1, "sa": 6}, {"n": "LARIOS MERCHAN JULIO MANUEL", "at": 26, "pe": 1, "sa": 4}, {"n": "FERREIRA DIAS KAIO", "at": 29, "pe": 4, "sa": 6}]}, "GUARDIA": {"monthly": {"ENERO": {"PERTURBACION": 0, "ATENDIDAS": 78, "SALIENTES": 6}, "FEBRERO": {"PERTURBACION": 7, "ATENDIDAS": 52, "SALIENTES": 2}, "MARZO": {"PERTURBACION": 1, "ATENDIDAS": 59, "SALIENTES": 5}, "ABRIL": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MAYO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JUNIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JULIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "AGOSTO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "SEPTIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "OCTUBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "NOVIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "DICIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}}, "agents": [{"n": "MENDOZA TORREJON DAVID", "at": 1, "pe": 0, "sa": 0}, {"n": "CÉSAR BUSTAMANTE GUSTAVO", "at": 27, "pe": 0, "sa": 1}, {"n": "HERRERA GUACHICHULLCA JAIRO", "at": 45, "pe": 0, "sa": 1}, {"n": "FERREIRA DIAS KAIO", "at": 38, "pe": 0, "sa": 4}, {"n": "RODRIGUEZ AREVALO ALBERTO", "at": 14, "pe": 0, "sa": 0}, {"n": "DUQUE VELASQUEZ CÉSAR", "at": 12, "pe": 0, "sa": 0}, {"n": "FERNANDEZ AGUADO FERNANDO", "at": 12, "pe": 7, "sa": 2}, {"n": "IZQUIERDO OLIVA EDUARDO", "at": 18, "pe": 0, "sa": 5}, {"n": "LARIOS MERCHAN JULIO MANUEL", "at": 9, "pe": 1, "sa": 0}, {"n": "HERRERA PEREZ RAUL", "at": 13, "pe": 0, "sa": 0}]}, "FSM112": {"monthly": {"ENERO": {"PERTURBACION": 5, "ATENDIDAS": 115, "SALIENTES": 5}, "FEBRERO": {"PERTURBACION": 1, "ATENDIDAS": 62, "SALIENTES": 3}, "MARZO": {"PERTURBACION": 4, "ATENDIDAS": 72, "SALIENTES": 5}, "ABRIL": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MAYO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JUNIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JULIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "AGOSTO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "SEPTIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "OCTUBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "NOVIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "DICIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}}, "agents": [{"n": "FERNANDEZ JIMENO DAVID", "at": 17, "pe": 0, "sa": 3}, {"n": "MENDOZA TORREJON DAVID", "at": 37, "pe": 0, "sa": 0}, {"n": "PULIDO POZO IGNACIO", "at": 30, "pe": 4, "sa": 4}, {"n": "SECA LOPEZ  IRVING", "at": 48, "pe": 1, "sa": 1}, {"n": "CERRADA RUIZ JOSE IGNACIO", "at": 52, "pe": 1, "sa": 3}, {"n": "RODRIGUEZ MACIZO JUAN ABEL", "at": 13, "pe": 0, "sa": 0}, {"n": "IVANOV TODOROV STIVAN", "at": 14, "pe": 0, "sa": 0}, {"n": "MARTIN ALONSO JULIAN", "at": 22, "pe": 0, "sa": 0}, {"n": "VICENTE GOMEZ MANUEL", "at": 16, "pe": 4, "sa": 2}]}, "GUARDIA112": {"monthly": {"ENERO": {"PERTURBACION": 3, "ATENDIDAS": 32, "SALIENTES": 0}, "FEBRERO": {"PERTURBACION": 0, "ATENDIDAS": 31, "SALIENTES": 1}, "MARZO": {"PERTURBACION": 5, "ATENDIDAS": 37, "SALIENTES": 4}, "ABRIL": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MAYO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JUNIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JULIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "AGOSTO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "SEPTIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "OCTUBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "NOVIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "DICIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}}, "agents": [{"n": "SACRISTAN HITA CARLOS", "at": 24, "pe": 0, "sa": 1}, {"n": "MENDOZA TORREJON DAVID", "at": 16, "pe": 3, "sa": 0}, {"n": "PULIDO POZO IGNACIO", "at": 6, "pe": 2, "sa": 0}, {"n": "MARTIN ALONSO JULIAN", "at": 2, "pe": 0, "sa": 0}, {"n": "IVANOV TODOROV STIVAN", "at": 10, "pe": 1, "sa": 0}, {"n": "MARTIN DEL REY ALVARO", "at": 20, "pe": 0, "sa": 4}, {"n": "VICENTE GOMEZ MANUEL", "at": 6, "pe": 0, "sa": 0}, {"n": "FERNANDEZ JIMENO DAVID", "at": 7, "pe": 2, "sa": 0}, {"n": "SECA LOPEZ  IRVING", "at": 1, "pe": 0, "sa": 0}, {"n": "CERRADA RUIZ JOSE IGNACIO", "at": 8, "pe": 0, "sa": 0}]}, "TOTAL": {"monthly": {"ENERO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "FEBRERO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MARZO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "ABRIL": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "MAYO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JUNIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "JULIO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "AGOSTO": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "SEPTIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "OCTUBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "NOVIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}, "DICIEMBRE": {"PERTURBACION": 0, "ATENDIDAS": 0, "SALIENTES": 0}}, "agents": []}};
-    const G_COLORS = {"FSM": "#4f9cf9", "GUARDIA": "#f97c4f", "FSM112": "#4ff9b8", "GUARDIA112": "#c94ff9"};
-    const G_LABELS = {"FSM": "FSM", "GUARDIA": "Guardia", "FSM112": "FSM 112", "GUARDIA112": "Guardia 112"};
-    const MESES_G = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-    const MESES_K = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-    const GT_ENTRANTES = {"FSM": {"ENERO": 335, "FEBRERO": 208, "MARZO": 252, "ABRIL": 0, "MAYO": 0, "JUNIO": 0, "JULIO": 0, "AGOSTO": 0, "SEPTIEMBRE": 0, "OCTUBRE": 0, "NOVIEMBRE": 0, "DICIEMBRE": 0}, "FSM112": {"ENERO": 16, "FEBRERO": 8, "MARZO": 9, "ABRIL": 0, "MAYO": 0, "JUNIO": 0, "JULIO": 0, "AGOSTO": 0, "SEPTIEMBRE": 0, "OCTUBRE": 0, "NOVIEMBRE": 0, "DICIEMBRE": 0}, "GUARDIA": {"ENERO": 91, "FEBRERO": 58, "MARZO": 75, "ABRIL": 0, "MAYO": 0, "JUNIO": 0, "JULIO": 0, "AGOSTO": 0, "SEPTIEMBRE": 0, "OCTUBRE": 0, "NOVIEMBRE": 0, "DICIEMBRE": 0}, "GUARDIA112": {"ENERO": 29, "FEBRERO": 29, "MARZO": 35, "ABRIL": 0, "MAYO": 0, "JUNIO": 0, "JULIO": 0, "AGOSTO": 0, "SEPTIEMBRE": 0, "OCTUBRE": 0, "NOVIEMBRE": 0, "DICIEMBRE": 0}};
-    
-const TD = [{"n": "ARJONA LEON MARIA JOSE (E_MAL247)", "web": 68, "mov": 0, "pert": 76, "at": 461, "sal": 276, "com": 737, "nor": 414, "far": 316, "cor": 126, "crem": 22, "cpre": 0}, {"n": "AYLLON MATA ANTONIO (E_AAM306)", "web": 61, "mov": 6, "pert": 60, "at": 88, "sal": 77, "com": 165, "nor": 94, "far": 81, "cor": 1, "crem": 0, "cpre": 44}, {"n": "BRIT PACHECO MONICA (E_MBP247)", "web": 52, "mov": 0, "pert": 24, "at": 372, "sal": 559, "com": 931, "nor": 185, "far": 246, "cor": 118, "crem": 93, "cpre": 0}, {"n": "CERRADA RUIZ JOSE IGNACIO (E_JCR203)", "web": 52, "mov": 5, "pert": 7, "at": 215, "sal": 189, "com": 404, "nor": 135, "far": 197, "cor": 85, "crem": 14, "cpre": 59}, {"n": "CAESAR BUSTAMANTE GUSTAVO (E_GCB25)", "web": 54, "mov": 1, "pert": 9, "at": 106, "sal": 134, "com": 240, "nor": 175, "far": 179, "cor": 278, "crem": 40, "cpre": 17}, {"n": "CHACON GONZALEZ ALVARO (E_ACG394)", "web": 23, "mov": 1, "pert": 1, "at": 14, "sal": 22, "com": 36, "nor": 5, "far": 26, "cor": 2, "crem": 2, "cpre": 11}, {"n": "DUCHEL BRAVO JAVIER (E_JDB71)", "web": 41, "mov": 0, "pert": 8, "at": 64, "sal": 49, "com": 113, "nor": 16, "far": 55, "cor": 10, "crem": 2, "cpre": 71}, {"n": "DUQUE VELASQUEZ CÉSAR (E_CDV23)", "web": 52, "mov": 1, "pert": 30, "at": 103, "sal": 114, "com": 217, "nor": 73, "far": 89, "cor": 93, "crem": 5, "cpre": 57}, {"n": "FERNANDEZ AGUADO FERNANDO (E_FFA28)", "web": 53, "mov": 0, "pert": 85, "at": 102, "sal": 114, "com": 216, "nor": 62, "far": 48, "cor": 10, "crem": 11, "cpre": 97}, {"n": "FERNANDEZ JIMENO DAVID (E_DFJ9)", "web": 40, "mov": 3, "pert": 30, "at": 238, "sal": 210, "com": 448, "nor": 144, "far": 106, "cor": 144, "crem": 35, "cpre": 19}, {"n": "FERREIRA DIAS KAIO (E_KFD1)", "web": 60, "mov": 4, "pert": 67, "at": 99, "sal": 83, "com": 182, "nor": 114, "far": 103, "cor": 121, "crem": 12, "cpre": 82}, {"n": "HERRERA GUACHICHULLCA JAIRO (E_JHG82)", "web": 66, "mov": 7, "pert": 20, "at": 249, "sal": 285, "com": 534, "nor": 162, "far": 141, "cor": 36, "crem": 32, "cpre": 146}, {"n": "HERRERA PEREZ RAUL  (e_rhp25)", "web": 58, "mov": 1, "pert": 26, "at": 381, "sal": 170, "com": 551, "nor": 243, "far": 283, "cor": 70, "crem": 11, "cpre": 102}, {"n": "ISIDRO MATXINANDIARENA GORKA (E_GIM7)", "web": 22, "mov": 0, "pert": 2, "at": 48, "sal": 29, "com": 77, "nor": 20, "far": 39, "cor": 6, "crem": 0, "cpre": 3}, {"n": "IVANOV TODOROV STIVAN (E_SIT8)", "web": 47, "mov": 6, "pert": 67, "at": 107, "sal": 36, "com": 143, "nor": 65, "far": 49, "cor": 37, "crem": 6, "cpre": 58}, {"n": "IZQUIERDO OLIVA EDUARDO (E_EIO3)", "web": 43, "mov": 1, "pert": 11, "at": 167, "sal": 216, "com": 383, "nor": 234, "far": 210, "cor": 177, "crem": 15, "cpre": 4}, {"n": "JOGLAR MARQUEZ RUBEN (E_RJM46)", "web": 76, "mov": 2, "pert": 24, "at": 106, "sal": 200, "com": 306, "nor": 112, "far": 99, "cor": 29, "crem": 9, "cpre": 10}, {"n": "LARIOS MERCHAN JULIO MANUEL (e_jlm194)", "web": 58, "mov": 0, "pert": 9, "at": 398, "sal": 591, "com": 989, "nor": 275, "far": 300, "cor": 45, "crem": 48, "cpre": 0}, {"n": "MARTIN ALONSO JULIAN (E_JMA150)", "web": 55, "mov": 15, "pert": 7, "at": 174, "sal": 189, "com": 363, "nor": 100, "far": 79, "cor": 47, "crem": 24, "cpre": 98}, {"n": "MARTIN DEL REY ALVARO (E_AMD97)", "web": 18, "mov": 16, "pert": 14, "at": 133, "sal": 128, "com": 261, "nor": 69, "far": 49, "cor": 63, "crem": 7, "cpre": 30}, {"n": "MARTIN MELERO RUBEN (E_RMM324)", "web": 44, "mov": 4, "pert": 24, "at": 249, "sal": 253, "com": 502, "nor": 93, "far": 170, "cor": 14, "crem": 13, "cpre": 12}, {"n": "MENDOZA TORREJON DAVID (E_DMT13)", "web": 76, "mov": 11, "pert": 66, "at": 182, "sal": 185, "com": 367, "nor": 146, "far": 149, "cor": 72, "crem": 18, "cpre": 37}, {"n": "PULIDO POZO IGNACIO (E_IPP17)", "web": 46, "mov": 5, "pert": 79, "at": 216, "sal": 202, "com": 418, "nor": 228, "far": 147, "cor": 188, "crem": 27, "cpre": 27}, {"n": "RODRIGUEZ AREVALO ALBERTO (E_ARA196)", "web": 15, "mov": 45, "pert": 26, "at": 234, "sal": 118, "com": 352, "nor": 74, "far": 93, "cor": 15, "crem": 3, "cpre": 145}, {"n": "SACRISTAN HITA CARLOS (E_CSH36)", "web": 58, "mov": 4, "pert": 10, "at": 138, "sal": 254, "com": 392, "nor": 247, "far": 221, "cor": 252, "crem": 20, "cpre": 59}, {"n": "SECA LOPEZ  IRVING (E_ISL35)", "web": 51, "mov": 14, "pert": 37, "at": 255, "sal": 237, "com": 492, "nor": 177, "far": 170, "cor": 164, "crem": 28, "cpre": 41}, {"n": "SOTO CORONADO RAFAEL (E_RSC94)", "web": 28, "mov": 0, "pert": 13, "at": 14, "sal": 90, "com": 104, "nor": 29, "far": 28, "cor": 7, "crem": 2, "cpre": 1}, {"n": "VAZQUEZ CESTEROS GERMAN (E_GVC21)", "web": 57, "mov": 6, "pert": 18, "at": 100, "sal": 94, "com": 194, "nor": 76, "far": 63, "cor": 19, "crem": 1, "cpre": 16}, {"n": "VELASCO DE LA CRUZ JUAN ANTONIO (E_JVD32)", "web": 61, "mov": 0, "pert": 17, "at": 366, "sal": 336, "com": 702, "nor": 344, "far": 351, "cor": 309, "crem": 32, "cpre": 89}, {"n": "VICENTE GOMEZ MANUEL (e_mvg283)", "web": 56, "mov": 13, "pert": 53, "at": 100, "sal": 145, "com": 245, "nor": 108, "far": 118, "cor": 67, "crem": 12, "cpre": 72}, {"n": "VIVAS LINARES MIGUEL (E_MVL106)", "web": 51, "mov": 2, "pert": 53, "at": 213, "sal": 78, "com": 291, "nor": 114, "far": 157, "cor": 35, "crem": 13, "cpre": 84}];
+// ==========================================
+// 1. CONFIGURACIÓN (RECUERDA PEGAR TU ENLACE)
+// ==========================================
+const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?gid=0&single=true&output=csv";
 
-// ── CHART.JS ───────────────────────────────────────────────────
-Chart.register(ChartDataLabels);
-Chart.defaults.color='#a5aed4';
-Chart.defaults.font.family="'DM Mono',monospace";
-Chart.defaults.font.size=11;
-const gc='rgba(255,255,255,.08)',tc='#b8c0e6';
-const TT={backgroundColor:'#1a1f35',borderColor:'#252c45',borderWidth:1};
-
-// Datalabels genéricos para gráficas verticales
-const vDL={display:true,anchor:'end',align:'end',offset:4,rotation:-90,color:'rgba(255,255,255,.9)',
-  font:{family:"'DM Mono',monospace",size:10,weight:'500'},
-  formatter:v=>v>0?v.toLocaleString('es'):''};
-
-// ── TABS ───────────────────────────────────────────────────────
-function switchTab(id,btn){
-  document.querySelectorAll('.tc').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.tbtn').forEach(e=>e.classList.remove('active'));
-  document.getElementById('tc-'+id).classList.add('active');
-  btn.classList.add('active');
-  if(id==='guardias'&&!window._gB){buildG();window._gB=true;}
-  if(id==='tecnicos'&&!window._tB){buildT();window._tB=true;}
-}
-
-// ── CITAS ──────────────────────────────────────────────────────
-const totC=DATA.meses.values.reduce((a,b)=>a+b,0);
-const mdC=DATA.meses.medias;
-new Chart(document.getElementById('cMes'),{type:'bar',
-  data:{labels:DATA.meses.labels,datasets:[
-    {type:'bar',label:'Citas',data:DATA.meses.values,
-      backgroundColor:DATA.meses.values.map(v=>'rgba(79,156,249,0.4)'),
-      borderColor:'#4f9cf9',borderWidth:2,borderRadius:6,yAxisID:'y',
-      datalabels: {display:true, anchor:'center', align:'center', rotation:-90, color:'rgba(255,255,255,.9)', font:{family:"'DM Mono',monospace",size:10,weight:'500'}, formatter:v=>v>0?v.toLocaleString('es'):''} },
-    {type:'line',label:'Media/día',data:mdC,borderColor:'#f97c4f',backgroundColor:'rgba(249,124,79,.15)',
-      borderWidth:2,pointRadius:4,pointBackgroundColor:'#f97c4f',pointBorderColor:'#0c0f1a',pointBorderWidth:2,
-      tension:.35,fill:false,yAxisID:'y2',
-      datalabels:{display:true,anchor:'end',align:'top',color:'#f97c4f',font:{size:9},formatter:v=>v.toFixed(1),padding:{bottom:2}}}]},
-  options:{responsive:true,layout:{padding:{top:40}},
-    plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:12,padding:16}},tooltip:{...TT},datalabels:{}},
-    scales:{x:{grid:{color:gc},ticks:{color:tc}},
-      y:{grid:{color:gc},ticks:{color:tc}},
-      y2:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#f97c4f',font:{size:9}}}} }});
-
-new Chart(document.getElementById('cDS'),{type:'bar',
-  data:{labels:DATA.diasSemana.labels,datasets:[{label:'Citas',data:DATA.diasSemana.values,
-    backgroundColor:['rgba(79,156,249,0.4)','rgba(249,124,79,0.4)','rgba(79,249,184,0.4)','rgba(201,79,249,0.4)','rgba(249,216,79,0.4)','rgba(160,160,160,0.4)','rgba(96,96,96,0.4)'],
-    borderColor:['#4f9cf9','#f97c4f','#4ff9b8','#c94ff9','#f9d84f','#a0a0a0','#606060'],
-    borderWidth: 2, borderRadius:6, datalabels:{...vDL,formatter:v=>v>=10?v.toLocaleString('es'):''}}]},
-  options:{responsive:true,layout:{padding:{top:40}},
-    plugins:{legend:{display:false},tooltip:{...TT},datalabels:{}},
-    scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc}}} }});
-
-const hCtx=document.getElementById('cH').getContext('2d');
-const hG=hCtx.createLinearGradient(0,0,0,300);
-hG.addColorStop(0,'rgba(79,249,184,.4)');hG.addColorStop(.5,'rgba(79,156,249,.4)');hG.addColorStop(1,'rgba(201,79,249,.1)');
-new Chart(hCtx,{type:'bar',
-  data:{labels:DATA.horas.labels,datasets:[{label:'Citas',data:DATA.horas.values,
-    backgroundColor:hG,borderColor:'#4ff9b8',borderWidth:2,borderRadius:5,
-    datalabels:{...vDL,formatter:v=>v>=10?v.toLocaleString('es'):''}}]},
-  options:{responsive:true,layout:{padding:{top:40}},
-    interaction: { mode: 'index', intersect: true }, 
-    plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:ctx=>` ${ctx.parsed.y.toLocaleString('es')} citas (${((ctx.parsed.y/totC)*100).toFixed(1)}%)`}},datalabels:{}},
-    scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc}}} }});
-
-const man=DATA.horas.values.slice(0,7).reduce((a,b)=>a+b,0);
-const tar=DATA.horas.values.slice(7).reduce((a,b)=>a+b,0);
-new Chart(document.getElementById('cT'),{type:'doughnut',
-  data:{labels:['Mañana (7–13h)','Tarde (14–21h)'],
-    datasets:[{data:[man,tar],backgroundColor:['rgba(79,249,184,.75)','rgba(201,79,249,.75)'],borderColor:['#4ff9b8','#c94ff9'],borderWidth:2,hoverOffset:8}]},
-  options:{responsive:true,cutout:'68%',
-    plugins:{
-      legend:{display:false},
-      tooltip:{...TT,callbacks:{label:ctx=>` ${ctx.parsed.toLocaleString('es')} (${((ctx.parsed/totC)*100).toFixed(1)}%)`}},
-      datalabels:{display:true, color:'rgba(255,255,255,0.95)', font:{size:13,weight:'bold'}, formatter:v=>v>0?v.toLocaleString('es'):''}
-    }
-  }});
-const lrT=document.getElementById('lrT');
-[{l:`Mañana · ${man.toLocaleString('es')}`,c:'#4ff9b8'},{l:`Tarde · ${tar.toLocaleString('es')}`,c:'#c94ff9'}]
-  .forEach(d=>lrT.innerHTML+=`<div class="li"><div class="ld" style="background:${d.c}"></div><span>${d.l}</span></div>`);
-
-const mxT=DATA.topDias[0]?.citas||1;
-document.getElementById('topDias').innerHTML='<thead><tr><th>#</th><th>Fecha</th><th>Citas</th><th style="width:80px">Rel.</th></tr></thead><tbody>'+
-  DATA.topDias.map((d,i)=>`<tr><td class="rank">${i+1}</td><td>${d.fecha}</td><td style="color:var(--accent1);font-weight:500">${d.citas}</td><td><div class="bm"><div class="bmf" style="width:${(d.citas/mxT*100).toFixed(0)}%"></div></div></td></tr>`).join('')+'</tbody>';
-
-const mHM=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const hm=document.getElementById('hmGrid');
-const allV=DATA.heatmap.data.flat();const hmMx=Math.max(...allV);
-function hC(v){const t=v/hmMx;if(t===0)return 'rgba(255,255,255,.04)';return `rgba(${Math.round(20+59*(1-t))},${Math.round(31+218*t)},${Math.round(53+131*(1-t*.5))},${.2+.8*t})`;}
-hm.innerHTML+='<div></div>';
-mHM.slice(1).forEach(m=>{hm.innerHTML+=`<div class="hmh">${m}</div>`;});
-DATA.heatmap.horas.forEach((h,hi)=>{
-  hm.innerHTML+=`<div class="hml">${h}h</div>`;
-  DATA.heatmap.data[hi].forEach((v,mi)=>{hm.innerHTML+=`<div class="hmc" style="background:${hC(v)}" title="${mHM[mi+1]} ${h}h: ${v}"></div>`;}); });
-const hLg=document.getElementById('hmLeg');
-[0,.2,.4,.6,.8,1].forEach(t=>{const d=document.createElement('div');d.style.cssText=`width:20px;height:12px;border-radius:2px;background:${hC(t*hmMx)}`;hLg.appendChild(d);});
-
-// ── GUARDIAS ──────────────────────────────────────────────────
-function buildG(){
-  const vd={display:true,anchor:'end',align:'end',offset:4,rotation:-90,color:'rgba(255,255,255,.9)',
-    font:{family:"'DM Mono',monospace",size:10,weight:'500'},formatter:v=>v>0?v.toLocaleString('es'):''};
-
-  const sk=Object.keys(GD);
-  function mkBar(id,met,lbl){
-    const vs=sk.map(s=>Object.values(GD[s].monthly).reduce((a,m)=>a+m[met],0));
-    const cs=sk.map(k=>G_COLORS[k]);
-    new Chart(document.getElementById(id),{type:'bar',
-      data:{labels:sk.map(k=>G_LABELS[k]),datasets:[{label:lbl,data:vs,
-        backgroundColor:cs.map(c=>c+'99'),borderColor:cs,borderWidth:2,borderRadius:8,
-        datalabels:{...vd,color:cs,font:{family:"'DM Mono',monospace",size:11,weight:'500'}}}]},
-      options:{responsive:true,layout:{padding:{top:40}},
-        plugins:{legend:{display:false},tooltip:{...TT},datalabels:{}},
-        scales:{x:{grid:{color:gc},ticks:{color:tc}},y:{grid:{color:gc},ticks:{color:tc},beginAtZero:true}}}});
-  }
-  mkBar('gAt','ATENDIDAS','Atendidas');
-  mkBar('gPe','PERTURBACION','Perturbaciones');
-  mkBar('gSa','SALIENTES','Salientes');
-
-  function bAt(tid,agents,acc){
-    const s=[...agents].sort((a,b)=>b.at-a.at).slice(0,10);const mx=s[0]?.at||1;
-    document.getElementById(tid).innerHTML='<thead><tr><th>#</th><th>Agente</th><th class="nc">Atend.</th><th class="nc">Pert.</th><th class="nc">Sal.</th><th style="width:60px">Rel.</th></tr></thead><tbody>'+
-      s.map((a,i)=>`<tr><td class="rank">${i+1}</td><td style="font-size:.72rem">${a.n}</td><td class="nc nh">${a.at}</td><td class="nc ${a.pe>10?'nw':''}">${a.pe}</td><td class="nc no">${a.sa}</td><td><div class="bm"><div class="bmf" style="width:${(a.at/mx*100).toFixed(0)}%;background:${acc}"></div></div></td></tr>`).join('')+'</tbody>';
-  }
-  bAt('gtFSM',   GD.FSM?.agents||[],      G_COLORS.FSM);
-  bAt('gtGUA',   GD.GUARDIA?.agents||[],  G_COLORS.GUARDIA);
-  bAt('gtF12',   GD.FSM112?.agents||[],   G_COLORS.FSM112);
-  bAt('gtG12',   GD.GUARDIA112?.agents||[],G_COLORS.GUARDIA112);
-
-  // ── TOTAL GUARDIAS ──────────────────────────────────────────
-  const ENT_SRVS = ['FSM','FSM112','GUARDIA','GUARDIA112'];
-  const ENT_IDS  = ['gtotFSM','gtotFSM112','gtotGUARDIA','gtotGUARDIA112'];
-  ENT_SRVS.forEach((k,i) => {
-    const tot = MESES_K.reduce((s,m) => s + ((GT_ENTRANTES[k]&&GT_ENTRANTES[k][m])||0), 0);
-    document.getElementById(ENT_IDS[i]).textContent = tot.toLocaleString('es');
-  });
-
-  new Chart(document.getElementById('gTotalMes'), {
-    type: 'bar',
-    data: {
-      labels: MESES_G,
-      datasets: ENT_SRVS.map((k,i) => ({
-        label: ['FSM','FSM 112','Guardia','Guardia 112'][i],
-        data: MESES_K.map(m => (GT_ENTRANTES[k]&&GT_ENTRANTES[k][m])||0),
-        backgroundColor: [G_COLORS.FSM,G_COLORS.FSM112,G_COLORS.GUARDIA,G_COLORS.GUARDIA112][i]+'99',
-        borderColor:     [G_COLORS.FSM,G_COLORS.FSM112,G_COLORS.GUARDIA,G_COLORS.GUARDIA112][i],
-        borderWidth: 2, borderRadius: 4,
-        datalabels: {...vDL, formatter: v => v > 0 ? v.toLocaleString('es') : ''}
-      }))
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      layout:{padding:{top:40}},
-      plugins:{
-        legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10,padding:12}},
-        tooltip:{...TT},
-        datalabels:{}
-      },
-      scales:{
-        x:{grid:{color:gc},ticks:{color:tc}},
-        y:{grid:{color:gc},ticks:{color:tc},beginAtZero:true}
-      }
-    }
-  });
-}
-
-// ── TÉCNICOS ──────────────────────────────────────────────────
-// Referencias globales para actualizar gráficos
-window.chartRk = null;
-window.chartSg = null;
-window.chartCi = null;
-
-function buildT(){
-  // Datalabels para barras horizontales
-  const vi={display:true,anchor:'center',align:'center',rotation:0,color:'rgba(255,255,255,.95)',font:{family:"'DM Mono',monospace",size:11,weight:'500'},formatter:v=>v>0?v.toLocaleString('es'):''};
-  const vd={display:true,anchor:'end',align:'end',offset:4,rotation:0,color:'rgba(255,255,255,.9)',font:{family:"'DM Mono',monospace",size:11,weight:'500'},formatter:v=>v>0?v.toLocaleString('es'):''};
-  
-  // Opciones para barras apiladas (Stacked) horizontales
-  const so=()=>{return{responsive:true,maintainAspectRatio:false,indexAxis:'y',layout:{padding:{right:40}},
-    plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10,padding:12}},tooltip:{...TT},datalabels:{}},
-    scales:{x:{stacked:true,grid:{color:gc},ticks:{color:tc,font:{size:11}},beginAtZero:true},y:{stacked:true,grid:{color:gc},ticks:{color:'#e8eaf2',font:{size:11}}}}};}
-  
-  // Opciones para barras horizontales normales
-  const uo=()=>{return{responsive:true,maintainAspectRatio:false,indexAxis:'y',layout:{padding:{right:40}},
-    plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:10,padding:12}},tooltip:{...TT},datalabels:{}},
-    scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:11}},beginAtZero:true},y:{grid:{color:gc},ticks:{color:'#e8eaf2',font:{size:11}}}}};}
-
-  // 1. Gráfica Comunicaciones (Filtros: at, sal)
-  const sC=[...TD].sort((a,b)=>b.com-a.com);
-  window.chartRk = new Chart(document.getElementById('tRk'),{type:'bar',data:{labels:sC.map(d=>d.n),datasets:[
-    {label:'Atendidas',data:sC.map(d=>d.at),backgroundColor:'rgba(79,156,249,.8)',borderColor:'#4f9cf9',borderWidth:1,borderRadius:3,stack:'c',datalabels:vi},
-    {label:'Salientes',data:sC.map(d=>d.sal),backgroundColor:'rgba(79,249,184,.65)',borderColor:'#4ff9b8',borderWidth:1,borderRadius:3,stack:'c',datalabels:vi}]},options:so()});
-
-  // Función Filtro Comunicaciones
-  window.filtRk = function(val) {
-    let sorted = [...TD];
-    if(val==='all') sorted.sort((a,b)=>b.com-a.com);
-    else sorted.sort((a,b)=>b[val]-a[val]);
-    chartRk.data.labels = sorted.map(d=>d.n);
-    let ds = [];
-    if(val==='all' || val==='at') ds.push({label:'Atendidas', data:sorted.map(d=>d.at), backgroundColor:'rgba(79,156,249,.8)', borderColor:'#4f9cf9', borderWidth:1, borderRadius:3, stack:'c', datalabels:vi});
-    if(val==='all' || val==='sal') ds.push({label:'Salientes', data:sorted.map(d=>d.sal), backgroundColor:'rgba(79,249,184,.65)', borderColor:'#4ff9b8', borderWidth:1, borderRadius:3, stack:'c', datalabels:vi});
-    chartRk.data.datasets = ds;
-    chartRk.update();
-  };
-
-  // Perturbaciones (No cambia)
-  const sP=[...TD].sort((a,b)=>b.pert-a.pert);
-  const oP={...uo(),plugins:{...uo().plugins,legend:{display:false}}};
-  new Chart(document.getElementById('tPe'),{type:'bar',data:{labels:sP.map(d=>d.n),datasets:[{label:'Perturb.',data:sP.map(d=>d.pert),
-    backgroundColor:sP.map(d=>d.pert>=200?'rgba(249,124,79,.85)':d.pert>=100?'rgba(249,216,79,.8)':'rgba(79,249,184,.7)'),
-    borderColor:sP.map(d=>d.pert>=200?'#f97c4f':d.pert>=100?'#f9d84f':'#4ff9b8'),
-    borderWidth:1, borderRadius:3,datalabels:{...vd,color:sP.map(d=>d.pert>=200?'#f97c4f':d.pert>=100?'#f9d84f':'#4ff9b8')}}]},options:oP});
-
-  // Web vs Móvil (No cambia)
-  const sW=[...TD].sort((a,b)=>(b.web+b.mov)-(a.web+a.mov));
-  new Chart(document.getElementById('tCx'),{type:'bar',data:{labels:sW.map(d=>d.n),datasets:[
-    {label:'Web',data:sW.map(d=>d.web),backgroundColor:'rgba(79,156,249,.85)',borderColor:'#4f9cf9',borderWidth:1,stack:'cx',borderRadius:3,datalabels:vi},
-    {label:'Móvil',data:sW.map(d=>d.mov),backgroundColor:'rgba(201,79,249,.75)',borderColor:'#c94ff9',borderWidth:1,stack:'cx',borderRadius:3,datalabels:vi}]},options:so()});
-
-  // 2. Seguimiento (Filtros: nor, far, cor)
-  const sN=[...TD].sort((a,b)=>(b.nor+b.far+b.cor)-(a.nor+a.far+a.cor));
-  window.chartSg = new Chart(document.getElementById('tSg'),{type:'bar',data:{labels:sN.map(d=>d.n),datasets:[
-    {label:'No-Reply',data:sN.map(d=>d.nor),backgroundColor:'rgba(249,124,79,.8)',borderColor:'#f97c4f',borderWidth:1,stack:'sg',borderRadius:3,datalabels:vi},
-    {label:'Faros',data:sN.map(d=>d.far),backgroundColor:'rgba(249,216,79,.75)',borderColor:'#f9d84f',borderWidth:1,stack:'sg',borderRadius:3,datalabels:vi},
-    {label:'Correos',data:sN.map(d=>d.cor),backgroundColor:'rgba(79,249,184,.7)',borderColor:'#4ff9b8',borderWidth:1,stack:'sg',borderRadius:3,datalabels:vi}]},options:so()});
-
-  window.filtSg = function(val) {
-    let sorted = [...TD];
-    if(val==='all') sorted.sort((a,b)=>(b.nor+b.far+b.cor)-(a.nor+a.far+a.cor));
-    else sorted.sort((a,b)=>b[val]-a[val]);
-    chartSg.data.labels = sorted.map(d=>d.n);
-    let ds = [];
-    if(val==='all' || val==='nor') ds.push({label:'No-Reply', data:sorted.map(d=>d.nor), backgroundColor:'rgba(249,124,79,.8)', borderColor:'#f97c4f', borderWidth:1, stack:'sg', borderRadius:3, datalabels:vi});
-    if(val==='all' || val==='far') ds.push({label:'Faros', data:sorted.map(d=>d.far), backgroundColor:'rgba(249,216,79,.75)', borderColor:'#f9d84f', borderWidth:1, stack:'sg', borderRadius:3, datalabels:vi});
-    if(val==='all' || val==='cor') ds.push({label:'Correos', data:sorted.map(d=>d.cor), backgroundColor:'rgba(79,249,184,.7)', borderColor:'#4ff9b8', borderWidth:1, stack:'sg', borderRadius:3, datalabels:vi});
-    chartSg.data.datasets = ds;
-    chartSg.update();
-  };
-
-  // 3. Citas (Filtros: crem, cpre)
-  const sCi=[...TD].sort((a,b)=>(b.crem+b.cpre)-(a.crem+a.cpre));
-  window.chartCi = new Chart(document.getElementById('tCi'),{type:'bar',data:{labels:sCi.map(d=>d.n),datasets:[
-    {label:'Remotas',data:sCi.map(d=>d.crem),backgroundColor:'rgba(79,249,184,.8)',borderColor:'#4ff9b8',borderWidth:1,stack:'ci',borderRadius:3,datalabels:vi},
-    {label:'Presenciales',data:sCi.map(d=>d.cpre),backgroundColor:'rgba(79,156,249,.75)',borderColor:'#4f9cf9',borderWidth:1,stack:'ci',borderRadius:3,datalabels:vi}]},options:so()});
-
-  window.filtCi = function(val) {
-    let sorted = [...TD];
-    if(val==='all') sorted.sort((a,b)=>(b.crem+b.cpre)-(a.crem+a.cpre));
-    else sorted.sort((a,b)=>b[val]-a[val]);
-    chartCi.data.labels = sorted.map(d=>d.n);
-    let ds = [];
-    if(val==='all' || val==='crem') ds.push({label:'Remotas', data:sorted.map(d=>d.crem), backgroundColor:'rgba(79,249,184,.8)', borderColor:'#4ff9b8', borderWidth:1, stack:'ci', borderRadius:3, datalabels:vi});
-    if(val==='all' || val==='cpre') ds.push({label:'Presenciales', data:sorted.map(d=>d.cpre), backgroundColor:'rgba(79,156,249,.75)', borderColor:'#4f9cf9', borderWidth:1, stack:'ci', borderRadius:3, datalabels:vi});
-    chartCi.data.datasets = ds;
-    chartCi.update();
-  };
-
-  const COLS=[
-    {k:'web',l:'Conexión Web',      p:'web', c:'var(--accent1)'},
-    {k:'mov',l:'Conexión Móvil',    p:'mov', c:'var(--accent4)'},
-    {k:'pert',l:'Perturbación',     p:'pert',c:'var(--accent2)'},
-    {k:'at', l:'Atendidas',         p:'at',  c:'var(--accent1)'},
-    {k:'sal',l:'Salientes',         p:'sal', c:'var(--accent3)'},
-    {k:'com',l:'Comunicaciones',    p:'com', c:'#e8eaf2'},
-    {k:'nor',l:'No-Reply',          p:'nor', c:'var(--accent2)'},
-    {k:'far',l:'Faros',             p:'far', c:'#f9d84f'},
-    {k:'cor',l:'Correos',           p:'cor', c:'var(--accent3)'},
-    {k:'crem',l:'Citas Remotas',    p:'crem',c:'var(--accent3)'},
-    {k:'cpre',l:'Citas Presenciales',p:'cpre',c:'var(--accent1)'},
-  ];
-  let vis=new Set(COLS.map(c=>c.k));
-
-  function rTbl(){
-    const cs=COLS.filter(c=>vis.has(c.k));
-    let sKey = 'com'; 
-    if(vis.size === 1) {
-      const sc = COLS.find(c => c.k === Array.from(vis)[0]);
-      if(sc) sKey = sc.p; 
-    }
-    
-    const sT=[...TD].sort((a,b)=>b[sKey]-a[sKey]);
-    const mxV=sT[0]?.[sKey]||1; 
-
-    document.getElementById('tTbl').innerHTML='<thead><tr><th>#</th><th>Técnico</th>'+cs.map(c=>`<th class="nc" style="color:${c.c}">${c.l}</th>`).join('')+'<th style="width:70px">Rel.</th></tr></thead><tbody>'+
-      sT.map((d,i)=>`<tr class="tech-row" onclick="openTechModal('${d.n}'); event.stopPropagation();"><td class="rank">${i+1}</td><td style="font-weight:500">${d.n}</td>`+cs.map(c=>{let cl='nc';if(c.k==='pert')cl+=d.pert>=200?' nw':d.pert>=100?' ':' no';return `<td class="${cl}" style="color:${c.c}">${d[c.p].toLocaleString('es')}</td>`;}).join('')+`<td><div class="bm"><div class="bmf" style="width:${(d[sKey]/mxV*100).toFixed(0)}%"></div></div></td></tr>`).join('')+'</tbody>';
-  }
-  function rOpts(){
-    document.getElementById('tCO').innerHTML=COLS.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;" onmouseenter="this.style.background='rgba(79,156,249,.08)'" onmouseleave="this.style.background='transparent'">
-      <input type="checkbox" ${vis.has(c.k)?'checked':''} onchange="togCol('${c.k}',this.checked)" style="accent-color:${c.c};width:14px;height:14px;cursor:pointer;flex-shrink:0;"/>
-      <span style="font-size:.75rem;color:var(--text);">${c.l}</span>
-      <span style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:${c.c};flex-shrink:0;"></span></label>`).join('');
-  }
-  function upd(){
-    const n=vis.size,all=n===COLS.length;
-    document.getElementById('tCL').textContent=all?'Todas las columnas':`${n} columna${n===1?'':'s'}`;
-    const b=document.getElementById('tCC');b.style.display=all?'none':'inline';b.textContent=n;
-    document.getElementById('tCR').style.display=all?'none':'inline-block';
-    document.getElementById('tCB').style.borderColor=all?'var(--border)':'var(--accent1)';
-  }
-  window.toggleTCol=()=>{const p=document.getElementById('tCP');const o=p.style.display==='block';p.style.display=o?'none':'block';if(!o)rOpts();};
-  window.togCol=(k,v)=>{if(v)vis.add(k);else vis.delete(k);upd();rTbl();rOpts();};
-  window.selAllCols=(a)=>{if(a)COLS.forEach(c=>vis.add(c.k));else vis.clear();upd();rTbl();rOpts();};
-  window.resetCols=()=>{COLS.forEach(c=>vis.add(c.k));upd();rTbl();rOpts();document.getElementById('tCP').style.display='none';};
-  document.addEventListener('click',e=>{const p=document.getElementById('tCP'),b=document.getElementById('tCB');if(p&&!p.contains(e.target)&&b&&!b.contains(e.target))p.style.display='none';});
-  rTbl();
-}
-
-// ── GENERADOR DE CSV ──────────────────────────────────────────
-window.downloadTechCSV = function(n) {
-  const t = TD.find(x => x.n === n);
-  if(!t) return;
-
-  const N = TD.length;
-  let tot = {com:0, at:0, sal:0, pert:0, web:0, mov:0, nor:0, far:0, cor:0, crem:0, cpre:0};
-  TD.forEach(x => { for(let k in tot) tot[k] += x[k]; });
-
-  const avg = {};
-  for(let k in tot) avg[k] = Math.round(tot[k] / N);
-
-  let csv = "Métrica;Técnico (" + t.n + ");Media Global\n";
-  csv += `Comunicaciones totales;${t.com};${avg.com}\n`;
-  csv += `Llamadas Atendidas;${t.at};${avg.at}\n`;
-  csv += `Llamadas Salientes;${t.sal};${avg.sal}\n`;
-  csv += `Perturbaciones / Rechazos;${t.pert};${avg.pert}\n`;
-  csv += `Conexión Web;${t.web};${avg.web}\n`;
-  csv += `Conexión Móvil;${t.mov};${avg.mov}\n`;
-  csv += `Seguimiento No-Reply;${t.nor};${avg.nor}\n`;
-  csv += `Seguimiento Faros;${t.far};${avg.far}\n`;
-  csv += `Seguimiento Correos;${t.cor};${avg.cor}\n`;
-  csv += `Citas Remotas;${t.crem};${avg.crem}\n`;
-  csv += `Citas Presenciales;${t.cpre};${avg.cpre}\n`;
-
-  const blob = new Blob(["\ufeff", csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  
-  link.href = url;
-  const safeName = t.n.replace(/[^a-zA-Z0-9]/gi, '_').replace(/_+/g, '_');
-  link.download = `Resumen_Tecnico_${safeName}.csv`;
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+const FESTIVOS_2026 = {
+    "ENERO": [1, 6], "ABRIL": [2, 3], "MAYO": [1, 15], "OCTUBRE": [12], "NOVIEMBRE": [2, 9], "DICIEMBRE": [7, 8, 24, 25, 31]
 };
 
-// ── LÓGICA MODAL DETALLE DE TÉCNICO ───────────────────────────
-window.openTechModal = function(n) {
-  const t = TD.find(x => x.n === n);
-  if(!t) return;
+const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+// EL DICCIONARIO ACTUALIZADO
+const MAPEO_TURNOS = {
+  "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
+  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
+  "3": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
+  "4": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
+  "5": { texto: "Guardia Bomberos Festivo", bg: "#F8CBAD", color: "#000" }, 
+  "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
+  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
+  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
+  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
+  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
+  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
+  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
+  "M7": { texto: "M7", bg: "#FFF2CC", color: "#000" }, 
+  "M8": { texto: "M8", bg: "#FFE699", color: "#000" }, 
+  "M9": { texto: "M9", bg: "#f2d16b", color: "#000" }, 
+  "TT": { texto: "TT", bg: "#FFC000", color: "#000" }, 
+  "L": { texto: "L", bg: "#00B0F0", color: "#fff" }, 
+  "G": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
+  "GF": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
+  "GFF": { texto: "Guardia Justicia Festivo", bg: "#B4C6E7", color: "#000" }, 
+  "V": { texto: "V", bg: "#92D050", color: "#000" }, 
+  "VC": { texto: "VC", bg: "#548235", color: "#fff" }, 
+  "B": { texto: "BAJA", bg: "#595959", color: "#fff" },
+  "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" },
+  "P": { texto: "PERMISO", bg: "#A6A6A6", color: "#000" }
+};
+
+let DATA = null;
+
+// ==========================================
+// 2. CARGA DE DATOS
+// ==========================================
+if (window.location.protocol === 'file:') {
+    document.getElementById('loading').innerHTML = '<div style="color:#ff7832; padding:20px; border:1px solid #ff7832; border-radius:8px;"><b>Aviso de seguridad:</b> Los navegadores bloquean la carga de datos desde archivos locales. Por favor, <b>sube este archivo a GitHub</b> para verlo funcionando.</div>';
+} else {
+    fetch(GOOGLE_CSV_URL)
+      .then(res => res.text())
+      .then(csv => {
+          let lineas = csv.split('\n').filter(l => l.trim() !== '');
+          let u = lineas[lineas.length - 1];
+          let i = u.indexOf('{'), f = u.lastIndexOf('}');
+          if (i === -1) throw "Error JSON";
+          DATA = JSON.parse(u.substring(i, f + 1).replace(/""/g, '"'));
+          init();
+      })
+      .catch(e => {
+          document.getElementById('loading').innerText = "Error al conectar con los datos. Revisa la publicación de Google Sheets.";
+          console.error(e);
+      });
+}
+
+function init() {
+    const ws = document.getElementById('worker-select');
+    const ms = document.getElementById('month-select');
+    DATA.p.sort().forEach(p => { let o = document.createElement('option'); o.value = p; o.textContent = p; ws.appendChild(o); });
+    MONTHS_ORDER.forEach(m => { let o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
+    ws.onchange = ms.onchange = render;
+    render();
+}
+
+function getDia(ab) {
+    const d = ab.toLowerCase().replace('.','').trim();
+    const m = {'lu':'LUN','ma':'MAR','mi':'MIE','ju':'JUE','vi':'VIE','sá':'SAB','sa':'SAB','do':'DOM'};
+    return m[d] || ab.toUpperCase();
+}
+
+function render() {
+  const selW = document.getElementById('worker-select').value;
+  const selM = document.getElementById('month-select').value;
+  const main = document.getElementById('main-content');
+  main.innerHTML = '';
+
+  if (selW !== 'ALL') renderSummary(selW, selM === 'ALL' ? MONTHS_ORDER : [selM]);
+  else document.getElementById('summary-bar').style.display = 'none';
+
+  const months = selM === 'ALL' ? MONTHS_ORDER : [selM];
   
-  const N = TD.length;
-  let tot = {com:0, at:0, sal:0, pert:0, web:0, mov:0, nor:0, far:0, cor:0, crem:0, cpre:0};
-  TD.forEach(x => { for(let k in tot) tot[k] += x[k]; });
-  
-  const avg = {};
-  for(let k in tot) avg[k] = Math.round(tot[k] / N);
+  months.forEach(mName => {
+    const m = DATA.m[mName];
+    if (!m) return;
 
-  const pertRateTech = t.at > 0 ? ((t.pert / t.at) * 100).toFixed(1) : 0;
-  const pertRateAvg = tot.at > 0 ? ((tot.pert / tot.at) * 100).toFixed(1) : 0;
+    const div = document.createElement('div');
+    div.className = 'month-section';
+    div.innerHTML = `<div class="month-header">${mName}<div style="flex:1;height:1px;background:var(--border)"></div></div>`;
 
-  document.getElementById('tech-modal-title').textContent = t.n;
-  document.getElementById('tech-modal-download').onclick = () => downloadTechCSV(t.n);
-
-  const html = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-bottom:28px;">
-      <div class="kpi-card" style="animation:none;transform:none;margin:0;">
-        <div class="kpi-label">Comunicaciones</div>
-        <div class="kpi-value" style="color:var(--text)">${t.com}</div>
-        <div class="kpi-sub">Media general: ${avg.com}</div>
-      </div>
-      <div class="kpi-card" style="animation:none;transform:none;margin:0;">
-        <div class="kpi-label">Atendidas</div>
-        <div class="kpi-value" style="color:var(--accent1)">${t.at}</div>
-        <div class="kpi-sub">Media general: ${avg.at}</div>
-      </div>
-      <div class="kpi-card" style="animation:none;transform:none;margin:0;">
-        <div class="kpi-label">Salientes</div>
-        <div class="kpi-value" style="color:var(--accent3)">${t.sal}</div>
-        <div class="kpi-sub">Media general: ${avg.sal}</div>
-      </div>
-      <div class="kpi-card" style="animation:none;transform:none;margin:0;">
-        <div class="kpi-label">Perturbaciones</div>
-        <div class="kpi-value" style="color:var(--accent2)">${t.pert}</div>
-        <div class="kpi-sub">${pertRateTech}% sobre atendidas<br>(Media total: ${pertRateAvg}%)</div>
-      </div>
-    </div>
+    const table = document.createElement('table');
+    table.className = 'cuadrante-table';
     
-    <div class="sl">Desglose Detallado y Comparativa</div>
-    <div class="scroller" style="overflow-x:auto;">
-      <table class="at" style="min-width:600px;">
-        <thead>
-          <tr>
-            <th>Métrica</th>
-            <th class="nc">Técnico</th>
-            <th class="nc">Media Global</th>
-            <th class="nc" style="width:120px">Desviación</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Llamadas Atendidas</td>
-            <td class="nc" style="color:var(--accent1);font-weight:bold;">${t.at}</td>
-            <td class="nc">${avg.at}</td>
-            <td class="nc">${t.at >= avg.at ? '<span style="color:#4ff9b8">📈 +'+(t.at-avg.at)+'</span>' : '<span style="color:#f97c4f">📉 '+(t.at-avg.at)+'</span>'}</td>
-          </tr>
-          <tr>
-            <td>Llamadas Salientes</td>
-            <td class="nc" style="color:var(--accent3);font-weight:bold;">${t.sal}</td>
-            <td class="nc">${avg.sal}</td>
-            <td class="nc">${t.sal >= avg.sal ? '<span style="color:#4ff9b8">📈 +'+(t.sal-avg.sal)+'</span>' : '<span style="color:#f97c4f">📉 '+(t.sal-avg.sal)+'</span>'}</td>
-          </tr>
-          <tr>
-            <td>Perturbaciones</td>
-            <td class="nc" style="color:var(--accent2);font-weight:bold;">${t.pert}</td>
-            <td class="nc">${avg.pert}</td>
-            <td class="nc">${t.pert <= avg.pert ? '<span style="color:#4ff9b8">✅ Mejor</span>' : '<span style="color:#f97c4f">⚠️ Peor</span>'}</td>
-          </tr>
-          <tr>
-            <td>Conexión (Web / Móvil)</td>
-            <td class="nc">${t.web} / ${t.mov}</td>
-            <td class="nc">${avg.web} / ${avg.mov}</td>
-            <td class="nc" style="color:var(--muted)">—</td>
-          </tr>
-          <tr>
-            <td>Seguimiento (No-Reply / Faros / Correos)</td>
-            <td class="nc">${t.nor} / ${t.far} / ${t.cor}</td>
-            <td class="nc">${avg.nor} / ${avg.far} / ${avg.cor}</td>
-            <td class="nc" style="color:var(--muted)">—</td>
-          </tr>
-          <tr>
-            <td>Citas (Remotas / Presenciales)</td>
-            <td class="nc">${t.crem} / ${t.cpre}</td>
-            <td class="nc">${avg.crem} / ${avg.cpre}</td>
-            <td class="nc" style="color:var(--muted)">—</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
+    // Header
+    let h = `<thead><tr><th class="worker-col">TRABAJADOR</th>`;
+    m.d.forEach(d => {
+      const isW = d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
+      h += `<th class="${isW ? 'weekend-th' : ''}"><div>${d.n}</div><div style="font-size:7px; opacity:0.6">${getDia(d.nm)}</div></th>`;
+    });
+    table.innerHTML = h + `</tr></thead>`;
 
-  document.getElementById('tech-modal-body').innerHTML = html;
-  document.getElementById('tech-modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeTechModal = function() {
-  document.getElementById('tech-modal').classList.remove('open');
-  document.body.style.overflow = '';
-};
-
-// ── MODAL PANTALLA COMPLETA (tablas + gráficos) ───────────────
-(function(){
-  let _modalChart = null;
-
-  function isInTecnicos(card){
-    return !!card.closest('#tc-tecnicos');
-  }
-
-  function canExpand(card){
-    return card.querySelector('table') || card.querySelector('canvas');
-  }
-
-  function openModal(card){
-    const title = card.querySelector('.ct')?.innerHTML || '';
-    const sub   = card.querySelector('.cs')?.textContent || '';
-    document.getElementById('tbl-modal-title').innerHTML = title;
-    document.getElementById('tbl-modal-sub').textContent  = sub;
-
-    const body = document.getElementById('tbl-modal-body');
-    body.innerHTML = '';
-
-    const tbl = card.querySelector('table');
-    if (tbl){
-      body.innerHTML = `<table class="${tbl.className}" style="width:100%;font-size:.9rem;">${tbl.innerHTML}</table>`;
-      body.style.overflowY = 'auto';
-      body.style.overflowX = 'auto';
-    } else {
-      const srcCanvas = card.querySelector('canvas');
-      if (srcCanvas){
-        const srcChart = Chart.getChart(srcCanvas);
-        if (!srcChart) return;
-
-        if (_modalChart){ _modalChart.destroy(); _modalChart = null; }
-
-        const wrap = document.createElement('div');
-        const isHoriz = srcChart.config.options.indexAxis === 'y';
+    // Body
+    const tbody = document.createElement('tbody');
+    m.w.forEach(wObj => {
+      if (selW !== 'ALL' && selW !== wObj.n) return;
+      const tr = document.createElement('tr');
+      let row = `<td class="worker-name">${wObj.n}</td>`;
+      const shifts = wObj.s.split(',');
+      
+      shifts.forEach((s, idx) => {
+        const d = m.d[idx];
+        const isW = d && (d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n)));
         
-        if (isHoriz) {
-            wrap.style.cssText = `position:relative;width:100%;height:1200px;`;
-            body.style.overflowY = 'auto';
-            body.style.overflowX = 'hidden';
-        } else {
-            wrap.style.cssText = `position:relative;width:100%;height:calc(90vh - 140px);`;
-            body.style.overflowY = 'hidden';
-            body.style.overflowX = 'auto';
+        let cellContent = s.trim();
+        let valKey = cellContent.toUpperCase();
+        let config = MAPEO_TURNOS[valKey];
+        
+        // ESTILOS DE CELDA COMPLETA
+        let tdClass = isW ? 'weekend-td' : '';
+        let tdStyle = '';
+        let textToShow = cellContent;
+
+        if (config) {
+            // Aplicamos el color al TD en lugar de a un span, con texto más pequeño para los largos
+            tdStyle = `background-color: ${config.bg} !important; color: ${config.color} !important; font-weight: 700; font-size: 9px; line-height: 1.1;`;
+            textToShow = config.texto;
         }
 
-        const newCanvas = document.createElement('canvas');
-        wrap.appendChild(newCanvas);
-        body.appendChild(wrap);
-
-        const origData = srcChart.config.data;
-        const origOpts = srcChart.config.options;
-
-        _modalChart = new Chart(newCanvas, {
-          type: srcChart.config.type,
-          data: origData,
-          options: Object.assign({}, origOpts, {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: false,
-          }),
-          plugins: srcChart.config.plugins,
-        });
-      }
-    }
-
-    document.getElementById('tbl-modal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  window.closeTblModal = function(){
-    document.getElementById('tbl-modal').classList.remove('open');
-    if (!document.getElementById('tech-modal').classList.contains('open')) {
-      document.body.style.overflow = '';
-    }
-    if (_modalChart){ _modalChart.destroy(); _modalChart = null; }
-  };
-
-  function attachExpand(card){
-    if (!canExpand(card)) return;
-    const canvas = card.querySelector('canvas');
-    if (canvas && !isInTecnicos(card)) return;
-    if (card.classList.contains('tbl-expand')) return;
-
-    card.classList.add('tbl-expand');
-    card.style.position = 'relative';
-    card.style.cursor   = 'pointer';
-    card.addEventListener('click', e=>{
-      // Se ignora el click si se pulsa sobre un elemento que tenga su propia interactividad
-      if (!e.target.closest('input,button,a,#tCB,#tCP,label,.tech-row')) openModal(card);
+        row += `<td class="${tdClass}" style="${tdStyle}">${textToShow}</td>`;
+      });
+      tr.innerHTML = row;
+      tbody.appendChild(tr);
     });
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.querySelectorAll('.cc').forEach(attachExpand);
-    const obs = new MutationObserver(()=>{
-      document.querySelectorAll('.cc:not(.tbl-expand)').forEach(attachExpand);
-    });
-    obs.observe(document.body, {childList:true, subtree:true});
+    table.appendChild(tbody);
+    div.appendChild(table);
+    main.appendChild(div);
   });
+}
 
-  document.addEventListener('keydown', e=>{ 
-    if(e.key==='Escape') {
-      window.closeTblModal(); 
-      window.closeTechModal();
-    }
-  });
+function renderSummary(worker, months) {
+  const bar = document.getElementById('summary-bar');
+  bar.style.display = 'flex';
+  const counts = {};
   
-  // Cerrar modales haciendo click fuera del contenido
-  document.getElementById('tbl-modal').addEventListener('click', e=>{
-    if (e.target === document.getElementById('tbl-modal')) window.closeTblModal();
+  months.forEach(mName => {
+    const m = DATA.m[mName];
+    if (!m) return;
+    const w = m.w.find(x => x.n === worker);
+    if (!w) return;
+    w.s.split(',').forEach(s => {
+      if (!s.trim()) return;
+      let val = s.trim().toUpperCase();
+      let config = MAPEO_TURNOS[val];
+      let key = config ? config.texto + '|' + config.bg : s + '|#7880a0';
+      if (!counts[key]) counts[key] = { n: 0, val: key.split('|')[0], col: key.split('|')[1] };
+      counts[key].n++;
+    });
   });
-  document.getElementById('tech-modal').addEventListener('click', e=>{
-    if (e.target === document.getElementById('tech-modal')) window.closeTechModal();
+
+  bar.innerHTML = `<span style="font-size:12px;font-weight:700;color:var(--text);margin-right:15px">RESUMEN ${worker}:</span>`;
+  Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'summary-item';
+    div.innerHTML = `<div class="summary-dot" style="background:${item.col}"></div><span class="summary-label">${item.val}</span><span class="summary-count" style="margin-left:4px; font-weight:700">${item.n}</span>`;
+    bar.appendChild(div);
   });
-})();
+}
 </script>
 </body>
 </html>
