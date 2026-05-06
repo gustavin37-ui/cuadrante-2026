@@ -28,6 +28,11 @@
   .controls { display: flex; align-items: center; gap: 12px; flex: 1; }
   select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 14px; min-width: 200px; outline: none; }
 
+  /* BOTÓN NOTIFICACIONES */
+  .btn-cambios { background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 14px; cursor:pointer; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; transition: 0.2s; }
+  .btn-cambios:hover { border-color: var(--accent); }
+  .badge { display:none; background:#ff7832; color:white; border-radius:50%; width:18px; height:18px; font-size:10px; align-items:center; justify-content:center; }
+
   .legend { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; align-items: center; }
   .legend-dot { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
 
@@ -37,17 +42,32 @@
 
   .cuadrante-table { border-collapse: collapse; width: 100%; min-width: 1000px; font-family: 'DM Mono', monospace; font-size: 11px; }
   .cuadrante-table th, .cuadrante-table td { border: 1px solid var(--border); text-align: center; vertical-align: middle; height: 40px; padding: 2px; }
-  
   .cuadrante-table th { background: var(--surface2); color: var(--text-muted); font-size: 10px; }
   .cuadrante-table th.worker-col { text-align: left; padding: 0 12px; width: 160px; background: var(--surface); position: sticky; left: 0; z-index: 3; }
   .cuadrante-table th.weekend-th { color: var(--weekend-text); background: rgba(255,120,50,0.05); }
-
   .cuadrante-table td.worker-name { text-align: left; padding: 0 12px; font-family: 'DM Sans'; font-weight: 600; background: var(--surface); position: sticky; left: 0; z-index: 2; white-space: nowrap; }
   .cuadrante-table td.weekend-td { background: var(--weekend-bg) !important; }
 
   .summary-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 24px; background: var(--surface2); border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
   .summary-item { display: flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 11px; }
   .summary-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ESTILOS DEL MODAL DE CAMBIOS */
+  .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15,17,23,0.8); backdrop-filter: blur(4px); }
+  .modal-content { background-color: var(--surface); margin: 5% auto; border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-size: 18px; color: var(--text); }
+  .close { color: var(--text-muted); font-size: 24px; font-weight: bold; cursor: pointer; }
+  .close:hover { color: var(--accent); }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  
+  .cambio-card { background: var(--surface2); border-left: 4px solid var(--border); padding: 12px 16px; margin-bottom: 12px; border-radius: 4px 8px 8px 4px; }
+  .cambio-card.mi-turno { border-left-color: #ff7832; background: rgba(255,120,50,0.05); }
+  .cambio-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+  .cambio-body { font-size: 13px; line-height: 1.5; }
+  .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;}
+  .tag-antes { background: #2e3350; text-decoration: line-through; opacity: 0.8; color: white;}
+  .tag-ahora { background: var(--accent); color: white; }
 </style>
 </head>
 <body>
@@ -57,6 +77,9 @@
   <div class="controls">
     <select id="worker-select"><option value="ALL">— Todos los trabajadores —</option></select>
     <select id="month-select"><option value="ALL">— Todos los meses —</option></select>
+    <button class="btn-cambios" onclick="abrirModal()">
+      🔔 Cambios <span id="badge" class="badge">0</span>
+    </button>
   </div>
 </header>
 
@@ -76,187 +99,345 @@
 <main>
   <div id="summary-bar" class="summary-bar" style="display:none"></div>
   <div id="main-content">
-    <div id="loading" style="text-align:center;padding:100px;color:var(--text-muted)">Conectando con el servidor de datos...</div>
+    <div id="loading" style="text-align:center;padding:100px;color:var(--text-muted)">Conectando con el servidor de datos y Firebase...</div>
   </div>
 </main>
 
-<script>
-// ==========================================
-// 1. CONFIGURACIÓN (RECUERDA PEGAR TU ENLACE)
-// ==========================================
-const GOOGLE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvTClT2hzoA08AiisWiUeSnEFobH42SGKuv8ZLgERkVhUfYGLd3FvH6xXwCubBAaGIKWL6JrkOa1J8/pub?gid=0&single=true&output=csv";
+<div id="modal-cambios" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Historial de Cambios (Nube)</h2>
+      <span class="close" onclick="cerrarModal()">&times;</span>
+    </div>
+    <div id="lista-cambios" class="modal-body">
+      <div style="text-align:center; color:var(--text-muted); padding: 40px 0;">Cargando historial...</div>
+    </div>
+  </div>
+</div>
 
-const FESTIVOS_2026 = {
-    "ENERO": [1, 6], "ABRIL": [2, 3], "MAYO": [1, 15], "OCTUBRE": [12], "NOVIEMBRE": [2, 9], "DICIEMBRE": [7, 8, 24, 25, 31]
-};
+<script type="module">
+  // ==========================================
+  // 1. IMPORTACIONES Y CONFIG DE FIREBASE
+  // ==========================================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  // 👇 SUSTITUYE ESTO POR TU CONFIGURACIÓN DE FIREBASE 👇
+  const firebaseConfig = {
+  apiKey: "AIzaSyAFKrld2vVpEj00FSLVSHq7n-ypnWArxhs",
+  authDomain: "cuadrante2026-6f3bf.firebaseapp.com",
+  projectId: "cuadrante2026-6f3bf",
+  storageBucket: "cuadrante2026-6f3bf.firebasestorage.app",
+  messagingSenderId: "117743811094",
+  appId: "1:117743811094:web:ed9cb3156d1bb7f3cb1337"
+  };
 
-// EL DICCIONARIO ACTUALIZADO
-const MAPEO_TURNOS = {
-  "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
-  "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
-  "3": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
-  "4": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
-  "5": { texto: "Guardia Bomberos Festivo", bg: "#F8CBAD", color: "#000" }, 
-  "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
-  "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
-  "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
-  "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
-  "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
-  "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
-  "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
-  "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
-  "M7": { texto: "M7", bg: "#FFF2CC", color: "#000" }, 
-  "M8": { texto: "M8", bg: "#FFE699", color: "#000" }, 
-  "M9": { texto: "M9", bg: "#f2d16b", color: "#000" }, 
-  "TT": { texto: "TT", bg: "#FFC000", color: "#000" }, 
-  "L": { texto: "L", bg: "#00B0F0", color: "#fff" }, 
-  "G": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
-  "GF": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
-  "GFF": { texto: "Guardia Justicia Festivo", bg: "#B4C6E7", color: "#000" }, 
-  "V": { texto: "V", bg: "#92D050", color: "#000" }, 
-  "VC": { texto: "VC", bg: "#548235", color: "#fff" }, 
-  "B": { texto: "BAJA", bg: "#595959", color: "#fff" },
-  "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" },
-  "P": { texto: "PERMISO", bg: "#A6A6A6", color: "#000" }
-};
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-let DATA = null;
+  // ==========================================
+  // 2. CONFIGURACIÓN DEL CUADRANTE
+  // ==========================================
+  const GOOGLE_CSV_URL = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap"; 
 
-// ==========================================
-// 2. CARGA DE DATOS
-// ==========================================
-if (window.location.protocol === 'file:') {
-    document.getElementById('loading').innerHTML = '<div style="color:#ff7832; padding:20px; border:1px solid #ff7832; border-radius:8px;"><b>Aviso de seguridad:</b> Los navegadores bloquean la carga de datos desde archivos locales. Por favor, <b>sube este archivo a GitHub</b> para verlo funcionando.</div>';
-} else {
-    fetch(GOOGLE_CSV_URL)
-      .then(res => res.text())
-      .then(csv => {
-          let lineas = csv.split('\n').filter(l => l.trim() !== '');
-          let u = lineas[lineas.length - 1];
-          let i = u.indexOf('{'), f = u.lastIndexOf('}');
-          if (i === -1) throw "Error JSON";
-          DATA = JSON.parse(u.substring(i, f + 1).replace(/""/g, '"'));
-          init();
-      })
-      .catch(e => {
-          document.getElementById('loading').innerText = "Error al conectar con los datos. Revisa la publicación de Google Sheets.";
-          console.error(e);
-      });
-}
+  const FESTIVOS_2026 = {
+      "ENERO": [1, 6], "MARZO": [19], "ABRIL": [2, 3], "MAYO": [1, 15], 
+      "AGOSTO": [15], "OCTUBRE": [12], "NOVIEMBRE": [9], "DICIEMBRE": [7, 8, 25]
+  };
 
-function init() {
-    const ws = document.getElementById('worker-select');
-    const ms = document.getElementById('month-select');
-    DATA.p.sort().forEach(p => { let o = document.createElement('option'); o.value = p; o.textContent = p; ws.appendChild(o); });
-    MONTHS_ORDER.forEach(m => { let o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
-    ws.onchange = ms.onchange = render;
-    render();
-}
+  const MONTHS_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
-function getDia(ab) {
-    const d = ab.toLowerCase().replace('.','').trim();
-    const m = {'lu':'LUN','ma':'MAR','mi':'MIE','ju':'JUE','vi':'VIE','sá':'SAB','sa':'SAB','do':'DOM'};
-    return m[d] || ab.toUpperCase();
-}
+  const MAPEO_TURNOS = {
+    "1": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
+    "LOC": { texto: "LOCALIZADO", bg: "#ace887", color: "#000" }, 
+    "3": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
+    "4": { texto: "Guardia Bomberos",  bg: "#F8CBAD", color: "#000" }, 
+    "5": { texto: "Guardia Bomberos Festivo", bg: "#F8CBAD", color: "#000" }, 
+    "FSM":     { texto: "FSM",     bg: "#FF0000", color: "#FFFFFF" },
+    "FSMF":    { texto: "FSM FESTIVO",    bg: "#FF0000", color: "#FFFFFF" },
+    "FSM112":  { texto: "FSM112",  bg: "#FF0000", color: "#FFFFFF" },
+    "FSM112F": { texto: "FSM112 FESTIVO", bg: "#FF0000", color: "#FFFFFF" },
+    "112M":    { texto: "LOC 112 MAÑANA",    bg: "#7a7979", color: "#000000" }, 
+    "112T":    { texto: "LOC 112 TARDE",    bg: "#D9D9D9", color: "#000000" }, 
+    "LOC112M": { texto: "LOC 112 MAÑANA", bg: "#7a7979", color: "#000000" }, 
+    "LOC112T": { texto: "LOC 112 TARDE", bg: "#D9D9D9", color: "#000000" }, 
+    "M7": { texto: "M7", bg: "#FFF2CC", color: "#000" }, 
+    "M8": { texto: "M8", bg: "#FFE699", color: "#000" }, 
+    "M9": { texto: "M9", bg: "#FFE699", color: "#000" }, 
+    "TT": { texto: "TT", bg: "#FFC000", color: "#000" }, 
+    "L": { texto: "L", bg: "#00B0F0", color: "#fff" }, 
+    "G": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
+    "GF": { texto: "Guardia Justicia", bg: "#B4C6E7", color: "#000" }, 
+    "GFF": { texto: "Guardia Justicia Festivo", bg: "#B4C6E7", color: "#000" }, 
+    "V": { texto: "V", bg: "#92D050", color: "#000" }, 
+    "VC": { texto: "VC", bg: "#548235", color: "#fff" }, 
+    "B": { texto: "BAJA", bg: "#595959", color: "#fff" },
+    "AAPP":    { texto: "AAPP",    bg: "#A6A6A6", color: "#000000" },
+    "P": { texto: "PERMISO", bg: "#A6A6A6", color: "#000" }
+  };
 
-function render() {
-  const selW = document.getElementById('worker-select').value;
-  const selM = document.getElementById('month-select').value;
-  const main = document.getElementById('main-content');
-  main.innerHTML = '';
+  let DATA = null;
+  let historialGlobal = [];
 
-  if (selW !== 'ALL') renderSummary(selW, selM === 'ALL' ? MONTHS_ORDER : [selM]);
-  else document.getElementById('summary-bar').style.display = 'none';
-
-  const months = selM === 'ALL' ? MONTHS_ORDER : [selM];
-  
-  months.forEach(mName => {
-    const m = DATA.m[mName];
-    if (!m) return;
-
-    const div = document.createElement('div');
-    div.className = 'month-section';
-    div.innerHTML = `<div class="month-header">${mName}<div style="flex:1;height:1px;background:var(--border)"></div></div>`;
-
-    const table = document.createElement('table');
-    table.className = 'cuadrante-table';
-    
-    // Header
-    let h = `<thead><tr><th class="worker-col">TRABAJADOR</th>`;
-    m.d.forEach(d => {
-      const isW = d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
-      h += `<th class="${isW ? 'weekend-th' : ''}"><div>${d.n}</div><div style="font-size:7px; opacity:0.6">${getDia(d.nm)}</div></th>`;
+  // ==========================================
+  // 3. CAPA DE OBTENCIÓN Y COMPARACIÓN (NUBE)
+  // ==========================================
+  fetch(GOOGLE_CSV_URL)
+    .then(res => res.text())
+    .then(csv => {
+        let lineas = csv.split('\n').filter(l => l.trim() !== '');
+        let u = lineas[lineas.length - 1];
+        let i = u.indexOf('{'), f = u.lastIndexOf('}');
+        if (i === -1) throw "Error JSON";
+        DATA = JSON.parse(u.substring(i, f + 1).replace(/""/g, '"'));
+        
+        init();
+        detectarCambiosNube(DATA); 
+    })
+    .catch(e => {
+        document.getElementById('loading').innerText = "Error al conectar con los datos.";
+        console.error(e);
     });
-    table.innerHTML = h + `</tr></thead>`;
 
-    // Body
-    const tbody = document.createElement('tbody');
-    m.w.forEach(wObj => {
-      if (selW !== 'ALL' && selW !== wObj.n) return;
-      const tr = document.createElement('tr');
-      let row = `<td class="worker-name">${wObj.n}</td>`;
-      const shifts = wObj.s.split(',');
-      
-      shifts.forEach((s, idx) => {
-        const d = m.d[idx];
-        const isW = d && (d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n)));
-        
-        let cellContent = s.trim();
-        let valKey = cellContent.toUpperCase();
-        let config = MAPEO_TURNOS[valKey];
-        
-        // ESTILOS DE CELDA COMPLETA
-        let tdClass = isW ? 'weekend-td' : '';
-        let tdStyle = '';
-        let textToShow = cellContent;
+  async function detectarCambiosNube(newData) {
+    try {
+      const snapshotRef = doc(db, "sistema", "cuadrante_snapshot");
+      const docSnap = await getDoc(snapshotRef);
+      let nuevosDetectados = 0;
 
-        if (config) {
-            // Aplicamos el color al TD en lugar de a un span, con texto más pequeño para los largos
-            tdStyle = `background-color: ${config.bg} !important; color: ${config.color} !important; font-weight: 700; font-size: 9px; line-height: 1.1;`;
-            textToShow = config.texto;
+      if (docSnap.exists()) {
+        const oldData = docSnap.data();
+
+        // Comparar mes a mes
+        for (let mName of MONTHS_ORDER) {
+          if (!newData.m[mName] || !oldData.m[mName]) continue;
+          const newW = newData.m[mName].w;
+          const oldW = oldData.m[mName].w;
+
+          for (let nwObj of newW) {
+            const owObj = oldW.find(x => x.n === nwObj.n);
+            if (owObj) {
+              const nShifts = nwObj.s.split(',');
+              const oShifts = owObj.s.split(',');
+
+              for (let i = 0; i < nShifts.length; i++) {
+                const nVal = nShifts[i].trim();
+                const oVal = (oShifts[i] || '').trim();
+
+                if (nVal !== oVal) {
+                  const dayObj = newData.m[mName].d[i];
+                  if(dayObj) {
+                      // Subir cambio individual a Firestore (Auditoría)
+                      await addDoc(collection(db, "historial_cambios"), {
+                        fecha: `${dayObj.n} de ${mName}`,
+                        trabajador: nwObj.n,
+                        antes: oVal === "" ? "Vacío" : oVal,
+                        ahora: nVal === "" ? "Vacío" : nVal,
+                        timestamp: new Date().getTime(),
+                        fechaString: new Date().toLocaleString()
+                      });
+                      nuevosDetectados++;
+                  }
+                }
+              }
+            }
+          }
         }
+      }
 
-        row += `<td class="${tdClass}" style="${tdStyle}">${textToShow}</td>`;
+      // Si hay cambios o es la primera vez, actualizamos el snapshot global en Firebase
+      if (!docSnap.exists() || nuevosDetectados > 0) {
+        await setDoc(snapshotRef, newData);
+      }
+
+      if (nuevosDetectados > 0) {
+        const badge = document.getElementById('badge');
+        badge.style.display = 'flex';
+        badge.innerText = nuevosDetectados;
+      }
+
+      // Descargamos el historial para que lo vea todo el mundo
+      cargarHistorial();
+
+    } catch (error) {
+      console.error("Error conectando a Firebase:", error);
+    }
+  }
+
+  async function cargarHistorial() {
+    try {
+      const q = query(collection(db, "historial_cambios"), orderBy("timestamp", "desc"), limit(100));
+      const querySnapshot = await getDocs(q);
+      historialGlobal = [];
+      querySnapshot.forEach((doc) => {
+        historialGlobal.push(doc.data());
       });
-      tr.innerHTML = row;
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    div.appendChild(table);
-    main.appendChild(div);
-  });
-}
+      renderHistorial();
+    } catch(err) {
+      console.log("No se pudo cargar el historial", err);
+    }
+  }
 
-function renderSummary(worker, months) {
-  const bar = document.getElementById('summary-bar');
-  bar.style.display = 'flex';
-  const counts = {};
-  
-  months.forEach(mName => {
-    const m = DATA.m[mName];
-    if (!m) return;
-    const w = m.w.find(x => x.n === worker);
-    if (!w) return;
-    w.s.split(',').forEach(s => {
-      if (!s.trim()) return;
-      let val = s.trim().toUpperCase();
-      let config = MAPEO_TURNOS[val];
-      let key = config ? config.texto + '|' + config.bg : s + '|#7880a0';
-      if (!counts[key]) counts[key] = { n: 0, val: key.split('|')[0], col: key.split('|')[1] };
-      counts[key].n++;
-    });
-  });
+  // ==========================================
+  // 4. FUNCIONES DE UI Y MODAL (Expuestas al Window)
+  // ==========================================
+  window.abrirModal = function() {
+    document.getElementById('modal-cambios').style.display = 'block';
+    document.getElementById('badge').style.display = 'none'; // Se da por visto
+  };
 
-  bar.innerHTML = `<span style="font-size:12px;font-weight:700;color:var(--text);margin-right:15px">RESUMEN ${worker}:</span>`;
-  Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'summary-item';
-    div.innerHTML = `<div class="summary-dot" style="background:${item.col}"></div><span class="summary-label">${item.val}</span><span class="summary-count" style="margin-left:4px; font-weight:700">${item.n}</span>`;
-    bar.appendChild(div);
-  });
-}
+  window.cerrarModal = function() {
+    document.getElementById('modal-cambios').style.display = 'none';
+  };
+
+  window.onclick = function(event) {
+    if (event.target == document.getElementById('modal-cambios')) window.cerrarModal();
+  };
+
+  function renderHistorial() {
+    const container = document.getElementById('lista-cambios');
+    const workerSelect = document.getElementById('worker-select').value;
+    
+    if (historialGlobal.length === 0) {
+      container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding: 40px 0;">No hay cambios registrados en la nube.</div>`;
+      return;
+    }
+
+    let html = '';
+    historialGlobal.forEach(c => {
+      const esMiTurno = (workerSelect !== 'ALL' && c.trabajador === workerSelect);
+      const claseAdicional = esMiTurno ? 'mi-turno' : '';
+      const tagAlerta = esMiTurno ? '<strong style="color:#ff7832">⚠️ ATENCIÓN EN TU TURNO</strong>' : `<strong>${c.trabajador}</strong>`;
+
+      html += `
+        <div class="cambio-card ${claseAdicional}">
+          <div class="cambio-header">
+            <span>📅 ${c.fecha}</span>
+            <span>Sincronizado: ${c.fechaString}</span>
+          </div>
+          <div class="cambio-body">
+            ${tagAlerta} cambió el turno:<br>
+            <span class="tag tag-antes">${c.antes}</span> ➔ <span class="tag tag-ahora">${c.ahora}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html;
+  }
+
+  // ==========================================
+  // 5. RENDERIZADO DEL CUADRANTE
+  // ==========================================
+  function init() {
+      const ws = document.getElementById('worker-select');
+      const ms = document.getElementById('month-select');
+      DATA.p.sort().forEach(p => { let o = document.createElement('option'); o.value = p; o.textContent = p; ws.appendChild(o); });
+      MONTHS_ORDER.forEach(m => { let o = document.createElement('option'); o.value = m; o.textContent = m; ms.appendChild(o); });
+      
+      ws.onchange = () => { render(); renderHistorial(); };
+      ms.onchange = () => { render(); renderHistorial(); };
+      render();
+  }
+
+  function getDia(ab) {
+      const d = ab.toLowerCase().replace('.','').trim();
+      const m = {'lu':'LUN','ma':'MAR','mi':'MIE','ju':'JUE','vi':'VIE','sá':'SAB','sa':'SAB','do':'DOM'};
+      return m[d] || ab.toUpperCase();
+  }
+
+  function render() {
+    const selW = document.getElementById('worker-select').value;
+    const selM = document.getElementById('month-select').value;
+    const main = document.getElementById('main-content');
+    main.innerHTML = '';
+
+    if (selW !== 'ALL') renderSummary(selW, selM === 'ALL' ? MONTHS_ORDER : [selM]);
+    else document.getElementById('summary-bar').style.display = 'none';
+
+    const months = selM === 'ALL' ? MONTHS_ORDER : [selM];
+    
+    months.forEach(mName => {
+      const m = DATA.m[mName];
+      if (!m) return;
+
+      const div = document.createElement('div');
+      div.className = 'month-section';
+      div.innerHTML = `<div class="month-header">${mName}<div style="flex:1;height:1px;background:var(--border)"></div></div>`;
+
+      const table = document.createElement('table');
+      table.className = 'cuadrante-table';
+      
+      let h = `<thead><tr><th class="worker-col">TRABAJADOR</th>`;
+      m.d.forEach(d => {
+        const isW = d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
+        h += `<th class="${isW ? 'weekend-th' : ''}"><div>${d.n}</div><div style="font-size:7px; opacity:0.6">${getDia(d.nm)}</div></th>`;
+      });
+      table.innerHTML = h + `</tr></thead>`;
+
+      const tbody = document.createElement('tbody');
+      m.w.forEach(wObj => {
+        if (selW !== 'ALL' && selW !== wObj.n) return;
+        const tr = document.createElement('tr');
+        let row = `<td class="worker-name">${wObj.n}</td>`;
+        const shifts = wObj.s.split(',');
+        
+        shifts.forEach((s, idx) => {
+          const d = m.d[idx];
+          const isW = d && (d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n)));
+          
+          let cellContent = s.trim();
+          let valKey = cellContent.toUpperCase();
+          let config = MAPEO_TURNOS[valKey];
+          
+          let tdClass = isW ? 'weekend-td' : '';
+          let tdStyle = '';
+          let textToShow = cellContent;
+
+          if (config) {
+              tdStyle = `background-color: ${config.bg} !important; color: ${config.color} !important; font-weight: 700; font-size: 9px; line-height: 1.1;`;
+              textToShow = config.texto;
+          }
+
+          row += `<td class="${tdClass}" style="${tdStyle}">${textToShow}</td>`;
+        });
+        tr.innerHTML = row;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      div.appendChild(table);
+      main.appendChild(div);
+    });
+  }
+
+  function renderSummary(worker, months) {
+    const bar = document.getElementById('summary-bar');
+    bar.style.display = 'flex';
+    const counts = {};
+    
+    months.forEach(mName => {
+      const m = DATA.m[mName];
+      if (!m) return;
+      const w = m.w.find(x => x.n === worker);
+      if (!w) return;
+      w.s.split(',').forEach(s => {
+        if (!s.trim()) return;
+        let val = s.trim().toUpperCase();
+        let config = MAPEO_TURNOS[val];
+        let key = config ? config.texto + '|' + config.bg : s + '|#7880a0';
+        if (!counts[key]) counts[key] = { n: 0, val: key.split('|')[0], col: key.split('|')[1] };
+        counts[key].n++;
+      });
+    });
+
+    bar.innerHTML = `<span style="font-size:12px;font-weight:700;color:var(--text);margin-right:15px">RESUMEN ${worker}:</span>`;
+    Object.values(counts).sort((a,b) => b.n - a.n).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'summary-item';
+      div.innerHTML = `<div class="summary-dot" style="background:${item.col}"></div><span class="summary-label">${item.val}</span><span class="summary-count" style="margin-left:4px; font-weight:700">${item.n}</span>`;
+      bar.appendChild(div);
+    });
+  }
 </script>
 </body>
 </html>
