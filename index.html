@@ -54,7 +54,18 @@
 
   /* ESTILOS DEL MODAL DE CAMBIOS */
   .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15,17,23,0.8); backdrop-filter: blur(4px); }
-  .modal-content { background-color: var(--surface); margin: 5% auto; border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .modal-content { 
+    background-color: var(--surface); 
+    margin: 5% auto; 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    width: 95%;
+    max-width: 1400px; 
+    max-height: 85vh; 
+    display: flex; 
+    flex-direction: column; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7); 
+  }
   .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .modal-header h2 { font-size: 18px; color: var(--text); }
   .close { color: var(--text-muted); font-size: 24px; font-weight: bold; cursor: pointer; }
@@ -294,7 +305,7 @@
     if (event.target == document.getElementById('modal-cambios')) window.cerrarModal();
   };
 
-  function renderHistorial() {
+function renderHistorial() {
     const container = document.getElementById('lista-cambios');
     const workerSelect = document.getElementById('worker-select').value;
     
@@ -303,26 +314,113 @@
       return;
     }
 
-    let html = '';
+    // 1. Agrupar el historial por Mes -> Trabajador -> Día
+    let agrupado = {};
     historialGlobal.forEach(c => {
-      const esMiTurno = (workerSelect !== 'ALL' && c.trabajador === workerSelect);
-      const claseAdicional = esMiTurno ? 'mi-turno' : '';
-      const tagAlerta = esMiTurno ? '<strong style="color:#ff7832">⚠️ ATENCIÓN EN TU TURNO</strong>' : `<strong>${c.trabajador}</strong>`;
+      // Separar el texto "15 de OCTUBRE"
+      let partes = c.fecha.split(' de ');
+      if (partes.length !== 2) return;
+      
+      let dia = partes[0].trim();
+      let mes = partes[1].trim();
+      let w = c.trabajador;
 
-      html += `
-        <div class="cambio-card ${claseAdicional}">
-          <div class="cambio-header">
-            <span>📅 ${c.fecha}</span>
-            <span>Sincronizado: ${c.fechaString}</span>
-          </div>
-          <div class="cambio-body">
-            ${tagAlerta} cambió el turno:<br>
-            <span class="tag tag-antes">${c.antes}</span> ➔ <span class="tag tag-ahora">${c.ahora}</span>
-          </div>
-        </div>
-      `;
+      if (!agrupado[mes]) agrupado[mes] = {};
+      if (!agrupado[mes][w]) agrupado[mes][w] = {};
+
+      // Guardamos el primer registro que encontremos (es el más reciente)
+      if (!agrupado[mes][w][dia]) {
+        agrupado[mes][w][dia] = c;
+      }
     });
-    
+
+    let html = '';
+
+    // 2. Iterar por cada mes en orden natural del año
+    MONTHS_ORDER.forEach(mName => {
+      if (!agrupado[mName]) return; // Si nadie cambió turno este mes, saltamos
+
+      let trabajadoresConCambios = Object.keys(agrupado[mName]);
+      
+      // Si tenemos seleccionado un trabajador concreto arriba, filtramos
+      if (workerSelect !== 'ALL') {
+        trabajadoresConCambios = trabajadoresConCambios.filter(w => w === workerSelect);
+      }
+
+      if (trabajadoresConCambios.length === 0) return;
+
+      // Dibujar cabecera del bloque del mes
+      html += `
+        <div class="month-section" style="margin-bottom: 30px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+          <div class="month-header" style="background: var(--surface2); padding: 12px 16px; margin: 0; color: #ff7832;">
+            📅 ${mName} <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">(Visualizando cambios)</span>
+          </div>
+          <div style="overflow-x: auto; padding-bottom: 10px;">
+            <table class="cuadrante-table" style="min-width: 1000px; border-style: hidden;">
+              <thead><tr><th class="worker-col" style="background: transparent;">TRABAJADOR</th>
+      `;
+
+      const mesData = DATA.m[mName];
+      if (!mesData) return;
+
+      // Dibujar la fila de los números de los días
+      mesData.d.forEach(d => {
+        const isW = d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
+        html += `<th class="${isW ? 'weekend-th' : ''}"><div>${d.n}</div><div style="font-size:7px; opacity:0.6">${getDia(d.nm)}</div></th>`;
+      });
+      html += `</tr></thead><tbody>`;
+
+      // Dibujar la fila de cada trabajador afectado
+      trabajadoresConCambios.sort().forEach(wName => {
+        const wData = mesData.w.find(x => x.n === wName);
+        if (!wData) return;
+
+        const esMiTurno = (workerSelect !== 'ALL' && wName === workerSelect);
+        html += `<tr><td class="worker-name" style="color:${esMiTurno ? '#ff7832' : 'inherit'}; background: transparent;">${wName}</td>`;
+
+        const shifts = wData.s.split(',');
+
+        shifts.forEach((s, idx) => {
+          const d = mesData.d[idx];
+          if (!d) return;
+
+          const isW = d.nm.includes('Sá') || d.nm.includes('Sa') || d.nm.includes('Do') || (FESTIVOS_2026[mName] || []).includes(parseInt(d.n));
+          let tdClass = isW ? 'weekend-td' : '';
+
+          let cellContent = s.trim();
+          let valKey = cellContent.toUpperCase();
+          let config = MAPEO_TURNOS[valKey];
+
+          let bg = config ? config.bg : 'transparent';
+          let color = config ? config.color : 'inherit';
+          let textToShow = config ? config.texto : cellContent;
+
+          // ¿Hay un cambio registrado en este día exacto?
+          let cambio = agrupado[mName][wName][d.n];
+
+          if (cambio) {
+            // SÍ HAY CAMBIO: Marco naranja, efecto iluminado y mostramos el ANTES y el DESPUÉS
+            html += `<td class="${tdClass}" style="background-color: ${bg} !important; color: ${color} !important; font-weight: 700; font-size: 10px; line-height: 1.1; border: 2px solid #ff7832; box-shadow: inset 0 0 15px rgba(255,120,50,0.6); position: relative;" title="Modificado: ${cambio.fechaString}">
+                       <div style="font-size:7px; text-decoration:line-through; opacity:0.6; margin-bottom:2px; line-height:1;">${cambio.antes || 'Vacío'}</div>
+                       <div>${cambio.ahora || 'Vacío'}</div>
+                     </td>`;
+          } else {
+            // NO HAY CAMBIO: Celda casi transparente para que el ojo vaya directo a lo naranja
+            html += `<td class="${tdClass}" style="background-color: ${bg} !important; color: ${color} !important; font-weight: 700; font-size: 9px; line-height: 1.1; opacity: 0.15;">
+                       ${textToShow}
+                     </td>`;
+          }
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody></table></div></div>`;
+    });
+
+    // Mensaje por si filtramos arriba a un trabajador sin cambios
+    if (html === '') {
+      html = `<div style="text-align:center; color:var(--text-muted); padding: 40px 0;">No hay cambios para los filtros seleccionados.</div>`;
+    }
+
     container.innerHTML = html;
   }
 
