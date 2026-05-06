@@ -41,9 +41,9 @@
   .month-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; text-transform: uppercase; font-weight: 700; color: var(--accent); font-size: 14px; }
 
   .cuadrante-table { border-collapse: collapse; width: 100%; min-width: 1000px; font-family: 'DM Mono', monospace; font-size: 11px; }
-  .cuadrante-table th, .cuadrante-table td { border: 1px solid var(--border); text-align: center; vertical-align: middle; height: 40px; padding: 2px; }
+  .cuadrante-table th, .cuadrante-table td {  border: 1px solid var(--border);  text-align: center;  vertical-align: middle;  height: 28px;  padding: 1px;}
   .cuadrante-table th { background: var(--surface2); color: var(--text-muted); font-size: 10px; }
-  .cuadrante-table th.worker-col { text-align: left; padding: 0 12px; width: 160px; background: var(--surface); position: sticky; left: 0; z-index: 3; }
+  .cuadrante-table th.worker-col {  text-align: left;  padding: 0 8px;  width: 140px;  background: var(--surface);  position: sticky;  left: 0;  z-index: 3;}
   .cuadrante-table th.weekend-th { color: var(--weekend-text); background: rgba(255,120,50,0.05); }
   .cuadrante-table td.worker-name { text-align: left; padding: 0 12px; font-family: 'DM Sans'; font-weight: 600; background: var(--surface); position: sticky; left: 0; z-index: 2; white-space: nowrap; }
   .cuadrante-table td.weekend-td { background: var(--weekend-bg) !important; }
@@ -344,13 +344,14 @@ function renderHistorial() {
 
       if (trabajadoresConCambios.length === 0) return;
 
-      html += `
+html += `
         <div class="month-section" style="margin-bottom: 30px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
           <div class="month-header" style="background: var(--surface2); padding: 12px 16px; margin: 0; color: #ff7832;">
             📅 ${mName} <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">(Visualizando cambios)</span>
           </div>
           <div style="overflow-x: auto; padding-bottom: 10px;">
-            <table class="cuadrante-table" style="min-width: 1000px; border-style: hidden;">
+            <table class="cuadrante-table" style="min-width: 1000px; border-style: hidden; table-layout: fixed;">
+              <style>#lista-cambios td { height: auto !important; padding: 4px 1px !important; }</style>
               <thead><tr><th class="worker-col" style="background: transparent;">TRABAJADOR</th>
       `;
 
